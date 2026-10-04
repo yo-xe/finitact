@@ -5,7 +5,7 @@
 `DecisionRequest` carries the goal, observation ID, observed candidates, bounded history, generic
 page context, and remaining provider-attempt budget. A decision provider returns exactly one candidate
 ID or terminal reason plus measurements. Confidence distributions, TypeSafe's operation/target heads,
-and raw responses are optional provider metadata; the agent never requires them to execute.
+and raw responses are optional provider metadata. The agent never requires them to execute.
 
 `TypeSafeDecisionProvider` adapts the current Jev request/response shape to that interface.
 `OpenAITextHelper` is a separate adapter because replacing action selection does not imply that generated
@@ -16,21 +16,21 @@ The input is a natural-language goal. Every page observation builds an indexed t
 
 One TypeSafe request asks which operation to perform and which target would be appropriate for each available operation. The executor consumes only the target head corresponding to the selected operation. This avoids serial operation-then-target calls and rejects targets incompatible with the operation. Dropdown targets include a code-owned option index.
 
-Operation and target questions receive the same next-step rules. Target criteria include current values and checked/selected state. The questions run independently: a target cannot read the operation answer, so its premise explicitly names the operation it assumes.
+Operation and target questions receive the same next-step rules. Target criteria include current values and checked/selected state. The questions run independently. A target cannot read the operation answer, so its premise names the operation it assumes.
 
-TYPE_TEXT sends the goal, selected field, visible page context, and recent actions to a small LLM. Its JSON must contain exactly one valid `text` value. The code does not extract quoted literals. A value can be reused after a stale decision only while the entire helper input is identical, and is discarded after a successful mutation.
+TYPE_TEXT sends the goal, selected field, visible page context, and recent actions to a small LLM. Its JSON must contain exactly one valid `text` value. The code does not extract quoted literals. The agent reuses a value after a stale decision only while the entire helper input is identical. It discards the value after a successful mutation.
 
 ## Runtime
 
-One browser-side DOM snapshot supplies common HTML/ARIA roles, names, values, visible text, and executable targets. A WeakMap gives each actual node a code-owned identity; a Map keeps the live references used for execution. Replaced elements receive new identities, disconnected references are pruned, and navigation starts a new cache. These IDs are not CDP backend node IDs. Geometry is always read again immediately before input.
+One browser-side DOM snapshot supplies common HTML/ARIA roles, names, values, visible text, and executable targets. A WeakMap gives each actual node a code-owned identity. A Map keeps the live references used for execution. Replaced elements receive new identities, the snapshot prunes disconnected references, and navigation starts a new cache. These IDs are not CDP backend node IDs. The executor reads geometry again immediately before input.
 
-The model sees visible text. Background focus emulation keeps animation frames running in the owned tab. Screenshots are optional and disabled in library calls by default; `screenshots=True` or `record_dir=...` enables them. The inspector enables them explicitly.
+The model sees visible text. Background focus emulation keeps animation frames running in the owned tab. Screenshots are optional and off by default in library calls. `screenshots=True` or `record_dir=...` enables them. The inspector enables them explicitly.
 
-Freshness compares semantic state instead of counting DOM mutations. Before a click/select, guards compare the document, full URL, viewport, safe form values/states, selected target, and nearby form/dialog/row context. Text generation, typing, scrolling, waiting, and completion use a full semantic comparison. The executor rechecks target visibility, enabled state, geometry, and click occlusion. Scoped guards intentionally permit unrelated visible content to change; this is a practical heuristic, not proof that arbitrary page changes are irrelevant to the goal.
+Freshness compares semantic state instead of counting DOM mutations. Before a click/select, guards compare the document, full URL, viewport, safe form values/states, selected target, and nearby form/dialog/row context. Text generation, typing, scrolling, waiting, and completion use a full semantic comparison. The executor rechecks target visibility, enabled state, geometry, and click occlusion. Scoped guards permit unrelated visible content to change on purpose. This is a practical heuristic, not proof that arbitrary page changes are irrelevant to the goal.
 
-Browser mutations are not retried by transport recovery. Completed execution is logged before the next observation, including when that observation encounters a navigation. An interrupted native-select evaluation stops because its change event may already have fired. Typing uses a browser select-all command followed by CDP text insertion, so existing input contents are replaced.
+Transport recovery does not retry browser mutations. The agent logs a completed execution before the next observation, including when that observation encounters a navigation. An interrupted native-select evaluation stops because its change event may already have fired. Typing uses a browser select-all command followed by CDP text insertion, so existing input contents are replaced.
 
-The next observation waits for up to two animation frames or 50 ms after an interaction. Editable ARIA comboboxes instead wait for visible options, capped at 200 ms. This avoids paying for a prediction before autocomplete suggestions arrive. An explicit WAIT remains 100 ms; network loading is never fast-forwarded in the recording.
+The next observation waits for up to two animation frames or 50 ms after an interaction. Editable ARIA comboboxes instead wait for visible options, capped at 200 ms. This avoids paying for a prediction before autocomplete suggestions arrive. An explicit WAIT remains 100 ms. The recording never fast-forwards network loading.
 
 ## Validation
 
@@ -39,6 +39,6 @@ text-cache invalidation, missing credentials, waits, and independent outcome che
 
 ## Boundaries
 
-Sixty browser actions and 120 decision requests bound a run. Up to 250 action candidates are retained; truncated candidates cannot be selected. The service stays loopback-only, serializes inspector actions, and checks Host, Origin, and a local request token. Credentials remain server-side. Tabs share the existing Chrome profile.
+Sixty browser actions and 120 decision requests bound a run. A run keeps up to 250 action candidates. The provider cannot select a truncated candidate. The service stays loopback-only, serializes inspector actions, and checks Host, Origin, and a local request token. Credentials remain server-side. Tabs share the existing Chrome profile.
 
-Existing fixtures and audits do not establish broad reliability. Name resolution covers common labels, ARIA references, and text; it is not the browser's full accessibility algorithm. Shadow roots, frames, canvas, uploads, nested scrolling, pop-ups, and complex keyboard interactions can block progress. A valid action can still be wrong. Independent checks, rather than the model's DONE choice, determine whether the task succeeded.
+Existing fixtures and audits do not establish broad reliability. Name resolution covers common labels, ARIA references, and text. It is not the browser's full accessibility algorithm. Shadow roots, frames, canvas, uploads, nested scrolling, pop-ups, and complex keyboard interactions can block progress. A valid action can still be wrong. Independent checks, rather than the model's DONE choice, determine whether the task succeeded.

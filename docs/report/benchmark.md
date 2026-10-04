@@ -3,22 +3,22 @@
 The Claude rows were measured on 2026-10-04 with one Finitact code snapshot (`e7b9cf0`, the last change to `finitact/`
 before the run) and the same prompt, preparation, calling-agent model and budgets for both systems. The multi-step runs
 followed `79d1b0f`, which changed only how the evaluation's calling-agent wrapper marks a Jev connection failure. The
-Codex Luna rows are an earlier, separate cohort (2026-10-01, commit `83a5095`) with a different calling-agent model;
+Codex Luna rows are an earlier, separate cohort (2026-10-01, commit `83a5095`) with a different calling-agent model.
 keep the two apart when interpreting differences.
 
 ## Summary
 
-- Short Windows tasks (C1, Claude): windows-mcp succeeded 10/10 on all 9 tasks; Finitact 10/10 on 8 and 9/10 on
+- Short Windows tasks (C1, Claude): windows-mcp succeeded 10/10 on all 9 tasks. Finitact succeeded 10/10 on 8 and 9/10 on
   Blender select mode. Finitact was faster on 7 of 9, and the calling agent used 1.4× to 6.5× fewer tokens with it on
   all 9.
 - Multi-step tasks (C2, Claude): Finitact succeeded 5/5 on all 5. windows-mcp succeeded 5/5 on four and 4/5 on the
   Wikipedia task, where one trial reached the article without a recorded search. With Finitact the calling agent used
-  fewer tokens on four (1.4× to 2.6×) and more on one (Wikipedia 1.4×); Finitact was faster on two.
+  fewer tokens on four (1.4× to 2.6×) and more on one (Wikipedia 1.4×). Finitact was faster on two.
 - The token gap is widest where windows-mcp needs many observe-act turns (VS Code, Explorer drag) and reverses on the
   long Wikipedia task, where the calling agent drives Finitact goal by goal. Finitact spends extra tokens on Jev that
-  the calling agent does not pay for; they are listed separately below.
+  the calling agent does not pay for. They are listed separately below.
 - Counting Jev and the calling agent at list prices, a trial cost less with Finitact on 13 of 14 tasks: 1.3× to 6.3×
-  on the short tasks and 1.4× to 1.9× on four multi-step ones; on Wikipedia it cost 1.1× more
+  on the short tasks and 1.4× to 1.9× on four multi-step ones. On Wikipedia it cost 1.1× more
   ([Cost per trial](#cost-per-trial)).
 - With Codex Luna (earlier cohort), Finitact succeeded in 82 of 90 short-task trials and windows-mcp in 63 of 90.
 - In the earlier September 30 run, typed text from one windows-mcp trial reached the operator's terminal instead of the
@@ -30,9 +30,9 @@ keep the two apart when interpreting differences.
 | --- | --- |
 | Calling agent | Claude Code 2.1.289 (`claude-sonnet-5-5`). Same system prompt, task text, preparation, budgets and timeout for both systems. Codex cohort: `gpt-6-luna` (below). |
 | Prompt | C1: the goal and the target window title. C2: the goal and one sentence on the open windows and pages. No ids, budgets, task-specific hints or tool instructions for either system. |
-| windows-mcp | 0.8.5; its non-UI tools (PowerShell, FileSystem, Registry, Process, Clipboard, Scrape, Notification) disabled so the task has to be done through the UI |
-| Finitact | commit `e7b9cf0`, its 7 MCP tools only, window-to-browser route on for every case ([ADR-0052](../adr/0052-window-browser-route-case.md)); decision model TypeSafe `jev-latest` |
-| Machine | Windows 11 Home (build 26200), Ryzen 7 7700, 24 GiB RAM, RTX 5070 12 GiB; the calling agent runs in WSL2 |
+| windows-mcp | 0.8.5, with its non-UI tools (PowerShell, FileSystem, Registry, Process, Clipboard, Scrape, Notification) disabled so the task has to be done through the UI |
+| Finitact | commit `e7b9cf0`, its 7 MCP tools only, window-to-browser route on for every case ([ADR-0052](../adr/0052-window-browser-route-case.md)). Decision model TypeSafe `jev-latest` |
+| Machine | Windows 11 Home (build 26200), Ryzen 7 7700, 24 GiB RAM, RTX 5070 12 GiB. The calling agent runs in WSL2 |
 | Success | an oracle independent of both systems (UI Automation read, file on disk, browser state), not the agent's own report |
 | Time | seconds from launching the calling agent to its exit |
 | Tokens | the calling agent's input (including cache reads and cache writes) plus output |
@@ -42,16 +42,16 @@ The harnesses are `scripts/run_phase_i_comparison.py` (short tasks, cases in
 Each trial starts from a fresh target state. Trials run one after another on the same desktop, never in parallel.
 
 Trial handling: a trial cut off by the calling agent's usage limit is invalid and is rerun. So is a Finitact trial
-in which Jev's API returned a connection error before any UI action (three Unity dropdown trials, BUG-0076); a Jev
+in which Jev's API returned a connection error before any UI action (three Unity dropdown trials, BUG-0076). A Jev
 failure after an action, or any other Jev error, counts against Finitact. A set stopped by a fault outside both
 systems was voided and rerun as a whole: in E2E-01, another window covering the desktop, the chat app's window never
-appearing (once per system) and the calling agent's MCP start exceeding its 30-second default; in E2E-02 Finitact,
-the harness not passing the browser's debugging endpoint, so the route was off; in E2E-04 Finitact, a stale input
+appearing (once per system) and the calling agent's MCP start exceeding its 30-second default. In E2E-02 Finitact,
+the harness not passing the browser's debugging endpoint, so the route was off. In E2E-04 Finitact, a stale input
 lock left by a stopped run. Only the reruns count.
 
 ## Short Windows tasks (C1, Claude)
 
-N=10 per system and task. Each cell lists **Finitact / windows-mcp**; times and tokens are medians.
+N=10 per system and task. Each cell lists **Finitact / windows-mcp**. Times and tokens are medians.
 
 | Task | Success F / W | Time F / W | Tokens F / W | Token ratio |
 | --- | ---: | ---: | ---: | ---: |
@@ -66,7 +66,7 @@ N=10 per system and task. Each cell lists **Finitact / windows-mcp**; times and 
 | Blender: select mode | 9/10 / 10/10 | 43.3 / 32.5 s | 20.8 / 42.0k | 2.0× |
 
 The Finitact failure on Blender select mode switched to Edit Mode, then reopened the dropdown and stopped below its
-confidence threshold; the oracle failed it because the menu was still open at the end.
+confidence threshold. The oracle failed it because the menu was still open at the end.
 
 ![Median time per short task](figures/c1-time.svg)
 ![Median calling-agent tokens per short task](figures/c1-tokens.svg)
@@ -82,7 +82,7 @@ controls by OCR and asks Jev at each step (median 10 and 33 Jev calls,
 ### Codex Luna cohort (2026-10-01, separate)
 
 Same nine tasks, N=10, commit `83a5095` for all nine, calling agent `gpt-6-luna` through the ChatGPT login path
-(without `OPENAI_API_KEY` or `CODEX_API_KEY`); subscription cost cannot be inferred from the token counts. Both
+(without `OPENAI_API_KEY` or `CODEX_API_KEY`). Subscription cost cannot be inferred from the token counts. Both
 systems received the same goal and target-window-title prompt.
 
 | Task | Success F / W | Time F / W | Tokens F / W |
@@ -97,13 +97,13 @@ systems received the same goal and target-window-title prompt.
 | Blender: switch workspace | 10/10 / 9/10 | 32.7 / 41.2 s | 123.1 / 80.5k |
 | Blender: select mode | 10/10 / 9/10 | 37.8 / 69.2 s | 163.9 / 99.6k |
 
-¹Three windows-mcp Notepad trials were externally undetermined because the target window changed during the run;
+¹Three windows-mcp Notepad trials were externally undetermined because the target window changed during the run.
 the seven scored trials were 3 successes and 4 failures. Finitact was faster on all 9 median times, while the calling
 agent's tokens were higher with it on seven tasks. The figures above use the Claude rows only.
 
 ## Multi-step tasks (C2, Claude)
 
-N=5 per system and task. Each cell lists **Finitact / windows-mcp**; times and tokens are medians over all five trials.
+N=5 per system and task. Each cell lists **Finitact / windows-mcp**. Times and tokens are medians over all five trials.
 
 | Task | Success F / W | Time F / W | Tokens F / W | Token ratio |
 | --- | ---: | ---: | ---: | ---: |
@@ -125,7 +125,7 @@ a failure under the rule fixed before the run (BUG-0071).
 ![Calling-agent tokens: windows-mcp ÷ Finitact](figures/ratio-tokens.svg)
 
 E2E-02 runs in a Chrome started with a remote-debugging port. When the calling agent drives that Chrome as a
-Windows window (`run_windows`), Finitact routes the call to the tab ([ADR-0051](../adr/0051-run-windows-browser-tab-browser.md));
+Windows window (`run_windows`), Finitact routes the call to the tab ([ADR-0051](../adr/0051-run-windows-browser-tab-browser.md)).
 without the route, the SQS request field has no accessibility name and Finitact stops below its confidence threshold.
 
 ## Jev usage inside Finitact
@@ -146,7 +146,7 @@ Calls that Finitact resolves by rule or by a `ref` count as attempts but send no
 
 ## Cost per trial
 
-Median USD per trial. Finitact is the calling agent plus Jev plus the text model it uses for text-entry goals;
+Median USD per trial. Finitact is the calling agent plus Jev plus the text model it uses for text-entry goals.
 windows-mcp is the calling agent only. Per-trial values are `outer_cost_usd` and `provider_cost_usd` in
 `data/c1-windows.jsonl` and `data/c2-e2e.jsonl`.
 
@@ -165,8 +165,8 @@ E2E-04 the calling agent used 1.4× more tokens with Finitact, and the trial cos
 2% to 44% of Finitact's median cost (Blender select mode is the largest).
 
 Prices (per million tokens, 2026-10-04): `claude-sonnet-5-5` input $2, cache write $4, cache read $0.20, output $10.
-Claude Code writes the cache with the 1-hour lifetime; at these prices the totals match the cost Claude Code itself
-reported for every C2 trial. Jev `jev-1.13.0` bills input only, $0.042; output is free
+Claude Code writes the cache with the 1-hour lifetime. At these prices the totals match the cost Claude Code itself
+reported for every C2 trial. Jev `jev-1.13.0` bills input only, $0.042. Output is free
 ([TypeSafe models](https://docs.typesafe.ai/models)). The text model `deepseek-chat` is priced at its peak rate
 (input $0.30 on a cache miss, $0.006 on a hit, output $1.20), an upper bound since the off-peak rate is half
 ([DeepSeek pricing](https://api-docs.deepseek.com/quick_start/pricing)). Subscription plans are not modeled.
@@ -175,7 +175,7 @@ reported for every C2 trial. Jev `jev-1.13.0` bills input only, $0.042; output i
 
 In the September 30 run, during E2E-05 with windows-mcp, the folder name the calling agent typed (`batch-0928`)
 appeared in the input line of the operator's own Claude Code terminal, a window outside the task. In 4 of 5 trials
-the agent issued a `Type` in parallel with clicks and a drag on another window in the same turn; windows-mcp runs such
+the agent issued a `Type` in parallel with clicks and a drag on another window in the same turn. The windows-mcp server runs such
 calls concurrently and `Type` does not check which window has focus when it types. Which call leaked could not be
 identified from the logs.
 
@@ -191,7 +191,7 @@ the kind of error that a single-shot score does not show.
 - N=10 and N=5 are small: 4/5 versus 5/5 is not distinguishable, 2/5 versus 5/5 is a signal but not a rate.
 - The tasks were written by the Finitact author, and Finitact was changed on some of them before this run.
   windows-mcp was not tuned.
-- Tk and the E2E fixtures are the author's own test targets. Unity opens a fixed project; Blender starts with factory
+- Tk and the E2E fixtures are the author's own test targets. Unity opens a fixed project. Blender starts with factory
   settings.
 - Jev tokens are excluded from the token comparison but included in the cost comparison. Costs use list prices on one
-  date; a price change on either side changes the ratio.
+  date. A price change on either side changes the ratio.

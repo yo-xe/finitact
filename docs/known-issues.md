@@ -2,8 +2,8 @@
 
 > Contents as of 2026-10-04. 日本語: [known-issues.ja.md](known-issues.ja.md)
 
-The bug records in `docs/bugs/` are written in Japanese and are append-only; they keep the reproduction notes from when
-each bug was found. This page explains the open issues by their effect on users and indexes the fixed ones by area.
+The bug records in `docs/bugs/` are in Japanese and are append-only. They keep the reproduction notes from the time
+when each bug was found. This page explains the open issues by their effect on users and indexes the fixed ones by area.
 Please report new problems as GitHub issues.
 
 ## Open (9)
@@ -12,7 +12,7 @@ Please report new problems as GitHub issues.
 
 - **[BUG-0023](bugs/0023-screen-210-blocked-0-2.md) On screens with many candidates, Jev picks BLOCKED instead of the right one (medium)**
   On the Windows screen path with about 210 candidates, BLOCKED can win as the relative maximum at a low probability
-  (around 0.2) and the run stops without acting. BLOCKED below confidence 0.6 is returned to the calling agent as
+  (around 0.2) and the run stops without acting. Finitact returns BLOCKED below confidence 0.6 to the calling agent as
   `provider_uncertain` with the candidate list, so the calling agent can continue by naming a candidate with a goal `ref`
   ([ADR-0020](adr/0020-blocked-0-6-provider-uncertain.md), [ADR-0022](adr/0022-provider-uncertain-agent.md)). Unity's "16:9 Aspect" resolution item still fails this way because Jev lacks the app knowledge.
 - **[BUG-0073](bugs/0073-run-windows-chrome-aws-sqs-uia.md) The screen path cannot fill an unlabelled number field in a browser window (medium)**
@@ -20,43 +20,43 @@ Please report new problems as GitHub issues.
   fill confidence 0.14–0.39 with the default `run_windows` screen path. When the browser window meets the conditions,
   `FINITACT_WINDOW_BROWSER_ROUTE=1` (or `routing=browser_if_singleton`) sends the goal to the browser path, which fills it ([ADR-0051](adr/0051-run-windows-browser-tab-browser.md)).
 - **[BUG-0068](bugs/0068-browser-wheel-2.md) In a background Chrome tab, the second of consecutive wheel scrolls does not move (medium)**
-  When wheel input is sent to the same background tab through CDP, the second wheel event never reaches the page, though
-  CDP reports success. The third one moves. Bringing the tab to the front avoids it but hides other tabs in the same
-  Chrome, so it is not used as the product fix. Check the position in the next observation after scrolling.
+  When Finitact sends wheel input to the same background tab through CDP, the second wheel event never reaches the page,
+  though CDP reports success. The third one moves. Bringing the tab to the front avoids it but hides other tabs in the same
+  Chrome, so the product does not use it as the fix. Check the position in the next observation after scrolling.
 - **[BUG-0074](bugs/0074-bug-0043-run-browser-run-runti.md) The first `run_browser` call can fail while its helper daemon starts (low)**
   The first run fails with `RuntimeError('listening on 127.0.0.1:…')`. Calling again with the same request succeeds.
   A recurrence of [BUG-0043](bugs/0043-run-browser-run-daemon-64-runt.md).
 - **[BUG-0076](bugs/0076-typesafe-httpx-httperror-run-e.md) A connection error to Jev's API stops the run without a retry (medium)**
-  HTTP 429/503/529 are retried, but a connection error is raised at once and the run ends with
+  The provider client retries HTTP 429/503/529, but it raises a connection error at once and the run ends with
   `Model connection failed; no action executed.` Nothing was sent to the target, so calling again with a new `run_id`
   is safe.
 - **[BUG-0077](bugs/0077-windows-interaction-lease-wait.md) After a run is killed mid-input, every later `run_windows` fails (medium)**
   Windows runs share a system-wide input mutex. If the process holding it is killed, the next run receives the
   abandoned mutex, raises `interaction lease owner exited unexpectedly` without releasing it, and every later run,
-  even in a new process, fails the same way. Restarting does not clear it; a one-off script that waits on the mutex
-  and releases it does.
+  even in a new process, fails the same way. Restarting does not clear it. A one-off script that waits on the mutex
+  and releases it clears it.
 
 ### Issues in the evaluation and the compared tool (Finitact's behaviour is not affected)
 
 - **[BUG-0071](bugs/0071-e2e-04-oracle.md) The E2E-04 (taskbar → search → article) judge passed a trial that skipped the search (high)**
-  Route evidence is now `pass/fail/unknown`, and old results without an independent `pass` were withdrawn. The
+  Route evidence is now `pass/fail/unknown`, and old results without an independent `pass` are withdrawn. The
   published E2E-04 numbers are the 2026-10-04 retake, where a trial counts as a success only with a `pass` route.
 - **[BUG-0062](bugs/0062-e2e-04-edge-uia-found-false-wi.md) The E2E-04 judge misses the end of an Edge article through UIA and fails a successful trial (medium)**
-  Re-scanning was added, but no trial has needed it yet, so the fix is unconfirmed.
+  The judge now re-scans, but no trial has needed it yet, so the fix is unconfirmed.
 - **[BUG-0063](bugs/0063-c2-e2e-05-windows-mcp-batch-09.md) The compared tool's (windows-mcp) `Type` typed into the operator's terminal (medium)**
-  windows-mcp does not check the foreground window while typing; when another action running in parallel moves the
+  windows-mcp does not check the foreground window while typing. When another action running in parallel moves the
   foreground, the text goes to another window. Finitact checks foreground, hit-test and idle on the target window right
   before sending input, so it has no such path ([ADR-0032](adr/0032-screen-idle-1.md), [ADR-0033](adr/0033-screen.md)). The report lists this under safety observations.
 
 ## Accepted limitations
 
-- **OCR fill without a readable caret is not confirmed before typing.** In apps that draw their own text fields and expose
-  no caret (Blender, Unity), an OCR fill candidate is clicked, then Ctrl+A and the text are sent without first confirming
-  that the field accepted focus ([ADR-0030](adr/0030-finitact-jev.md) addendum 5). Fields that UIA or a caret can confirm
-  (Notepad, VS Code, Discord, Chrome) are not affected. Check the field value in the next observation.
+- **Finitact does not check OCR fill without a readable caret before typing.** In apps that draw their own text fields and expose
+  no caret (Blender, Unity), Finitact clicks an OCR fill candidate, then sends Ctrl+A and the text without first checking
+  that the field accepted focus ([ADR-0030](adr/0030-finitact-jev.md) addendum 5). This does not affect fields that UIA or a caret can check
+  (Notepad, VS Code, Discord, Chrome). Check the field value in the next observation.
 - **A correct row selection in a Tk Listbox is reported as `unverified`**, because the selection state cannot be read back.
 - **Finitact does not check that an `app_expect` feed is truthful.** The feed is the responsibility of the caller and the
-  app-side plugin; only a matching value written after the action counts as `outcome_verified`, so a wrong feed can produce
+  app-side plugin. Only a matching value written after the action counts as `outcome_verified`, so a wrong feed can produce
   a wrong verdict ([ADR-0053](adr/0053-adr-0017-feed.md)).
 
 ## Index of fixed and won't-fix records (67)

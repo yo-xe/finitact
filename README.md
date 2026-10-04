@@ -16,7 +16,7 @@ Finitact observes the screen, reduces it to a finite list of candidates, has a s
 > Finitact started as an independently maintained copy of
 > [`browser-use/jev-ultrafast`](https://github.com/browser-use/jev-ultrafast). It is a personal project, not an
 > official release of Browser Use or TypeSafe, and it is not affiliated with windows-mcp. The original MIT
-> copyright is preserved in [LICENSE](LICENSE); provenance is in [NOTICE](NOTICE).
+> copyright stays in [LICENSE](LICENSE). [NOTICE](NOTICE) records the provenance.
 
 ## Intent
 
@@ -45,19 +45,19 @@ My feed is full of posts praising Jev. Honestly, though, Jev is hard to use. Cur
   ([ADR-0019](docs/adr/0019-bug-0023-label-agent.md), [ADR-0020](docs/adr/0020-blocked-0-6-provider-uncertain.md),
   [ADR-0022](docs/adr/0022-provider-uncertain-agent.md)).
 - **`DONE` is not proof.**
-  Its progress signals cannot be trusted yet. Success is decided by a rule over the observed screen change, combined
-  with Jev's judgment of whether that change satisfies the goal. The judgment is conservative: on held-out samples it
+  Its progress signals cannot be trusted yet. Finitact decides success with a rule over the observed screen change,
+  combined with Jev's judgment of whether that change satisfies the goal. The judgment is conservative: on held-out samples it
   confirmed only 44–56% of real successes, and it never confirms a fill that replaces a one-line document. A miss
   becomes "unverified", not a false success ([ADR-0030](docs/adr/0030-finitact-jev.md)).
-- **Safety cannot be delegated to the model.** Whether a region is an input field, or whether a popup is transient,
-  was judged correctly only 75–82% of the time. Finitact guarantees that a candidate is executable from observed
-  evidence or checks just before input; Jev only chooses among executable candidates.
+- **Safety cannot be delegated to the model.** Jev judged correctly only 75–82% of the time whether a region is an
+  input field, or whether a popup is transient. Finitact guarantees that a candidate is executable from observed
+  evidence or checks just before input. Jev only chooses among executable candidates.
 - **Agents do not use the interface you design for them.** Calling agents ignored or confused the first two ways to
   pick a candidate directly. Instead of tuning tool descriptions, I collapsed them into one field on the goal (`ref`)
   ([ADR-0041](docs/adr/0041-observe-window-ref-pick.md)–[ADR-0043](docs/adr/0043-jev-goal-ref.md)).
 - **Decision quality: hoping for more.** On a fixed set of 13 decision cases × 10 repetitions, Jev chose the expected
   action 89.2% of the time.
-  For reference, a local Qwen2.5-14B scored 84.6%; neither reached the preregistered 90% bar, and their failures took
+  For reference, a local Qwen2.5-14B scored 84.6%. Neither reached the preregistered 90% bar, and their failures took
   different shapes. Laya 0.3.21 scored lower still, at 53.8% ([decision-model comparison](docs/report/jev.md)).
 
 I wanted to avoid having the agent itself do so-called prompt engineering to steer Jev, but in places it ended up
@@ -71,7 +71,7 @@ flowchart LR
     subgraph A[Calling agent: Claude Code, Codex, ...]
         A1[Split the task into short goals]
         A2[Choose the target tab or window]
-        A3[Read outcomes; rephrase or pick by ref]
+        A3[Read outcomes, then rephrase or pick by ref]
     end
     A -- "run_browser / run_windows<br/>goals, fill values, optional ref" --> F
     subgraph F[Finitact MCP server]
@@ -92,8 +92,8 @@ flowchart LR
 | Role | Decides | Never does |
 |---|---|---|
 | Calling agent | What the goals are, which window or tab, the exact text to enter, what to do after a failure | See every intermediate screen (unless it asks with `observe_*`) |
-| Finitact | What is observable and executable, when to stop, whether input may be sent, whether the goal was reached | Invent selectors or coordinates; resend input whose delivery is uncertain |
-| Jev | Which observed candidate matches the goal; whether an observed change fits the goal | Produce coordinates, selectors, or text; guarantee safety |
+| Finitact | What is observable and executable, when to stop, whether input may be sent, whether the goal was reached | Invent selectors or coordinates, or resend input whose delivery is uncertain |
+| Jev | Which observed candidate matches the goal, and whether an observed change fits the goal | Produce coordinates, selectors, or text, or guarantee safety |
 
 A small text model writes a value only when a browser goal needs text and the agent did not supply `fill_values`.
 
@@ -150,9 +150,9 @@ same prompt for both systems. Details and limits are in [docs/report/](docs/repo
 |---|---|---|
 | Python 3.12+ and [uv](https://docs.astral.sh/uv/) | everything | |
 | TypeSafe API key (`TYPESAFE_API_KEY`) | every run | Jev chooses each action. Get a key from [TypeSafe](https://docs.typesafe.ai) |
-| OpenAI-compatible text model key (`TEXT_MODEL_API_KEY`) | fill goals without `fill_values` | Composes the text to type; default endpoint is OpenRouter (`.env.example`) |
+| OpenAI-compatible text model key (`TEXT_MODEL_API_KEY`) | fill goals without `fill_values` | Composes the text to type. The default endpoint is OpenRouter (`.env.example`) |
 | Chrome started with `--remote-debugging-port` | `run_browser` | See [Prerequisites for browser operation](#prerequisites-for-browser-operation) |
-| Windows 10/11 x64, Windows-native Python 3.12 with the `screen` extra | `run_windows` | OCR is RapidOCR (ONNX Runtime / OpenVINO), installed by pip; its models are fetched once. No Tesseract or other system OCR is needed. UI Automation uses `comtypes` |
+| Windows 10/11 x64, Windows-native Python 3.12 with the `screen` extra | `run_windows` | OCR is RapidOCR (ONNX Runtime / OpenVINO), installed by pip. RapidOCR downloads its models once. You do not need Tesseract or other system OCR. UI Automation uses `comtypes` |
 
 The server reads the checkout's `.env` at start-up (variables set by the MCP client take precedence), so the keys
 do not have to be passed through the client configuration.
@@ -166,7 +166,7 @@ cp .env.example .env   # set TYPESAFE_API_KEY (and TEXT_MODEL_API_KEY for genera
 
 ### Browser
 
-Start Chrome with remote debugging (a disposable profile is recommended), then register the server with your MCP
+Start Chrome with remote debugging (we recommend a disposable profile), then register the server with your MCP
 client:
 
 ```bash
@@ -178,22 +178,22 @@ Set `BU_CDP_URL=http://127.0.0.1:9222` if Chrome listens on a non-default endpoi
 #### Prerequisites for browser operation
 
 `run_browser` needs a Chrome reachable over CDP: started with `--remote-debugging-port` (default `9222`, otherwise
-`BU_CDP_URL`). `run_windows` hands a goal on a Chrome window to the browser path only when all of these hold; otherwise
-it stays on screen input:
+`BU_CDP_URL`). `run_windows` hands a goal on a Chrome window to the browser path only when all of these conditions hold.
+Otherwise it stays on screen input:
 
-- enabled by `routing: "browser_if_singleton"` on the call, or by `FINITACT_WINDOW_BROWSER_ROUTE=1` for calls that omit `routing`;
-- `BU_CDP_URL` is a local `http` endpoint (`127.0.0.1`, `localhost`, `::1`) and `BU_CDP_WS` is unset;
-- the CDP browser process owns exactly one visible, non-minimized window, the target (its own bubbles, such as the
-  download bubble, are ignored), and that window has exactly one tab;
-- the tab's title prefixes the window title, its page is `http(s)` and visible, and the window does not change while this is checked;
+- enabled by `routing: "browser_if_singleton"` on the call, or by `FINITACT_WINDOW_BROWSER_ROUTE=1` for calls that omit `routing`.
+- `BU_CDP_URL` is a local `http` endpoint (`127.0.0.1`, `localhost`, `::1`) and `BU_CDP_WS` is unset.
+- the CDP browser process owns exactly one visible, non-minimized window, the target, and that window has exactly
+  one tab. Finitact ignores the browser's own bubbles, such as the download bubble.
+- the tab's title prefixes the window title, its page is `http(s)` and visible, and the window does not change while Finitact checks this.
 - the call has one goal and no `ref`, drop target, operation limits, label constraints or selection policies.
 
-An everyday Chrome with several tabs therefore stays on screen input; use a dedicated profile with a single tab.
+An everyday Chrome with several tabs therefore stays on screen input. Use a dedicated profile with a single tab.
 
 ### Windows
 
-Mouse and keyboard input is only sent from Windows-native Python. Install into a Windows venv (x64) with the screen extra and
-fetch the OCR models once:
+Only Windows-native Python sends mouse and keyboard input. Install into a Windows venv (x64) with the screen extra and
+download the OCR models once:
 
 ```powershell
 py -3.12 -m venv .venv; .venv\Scripts\python.exe -m pip install -e ".[screen]"
@@ -207,7 +207,7 @@ claude mcp add finitact -- C:\path\to\finitact\.venv\Scripts\python.exe -m finit
 ```
 
 From a client running in WSL, set `FINITACT_WINDOWS_PYTHON` in `.env` to that `python.exe` and register
-[`scripts/finitact-mcp-windows.sh`](scripts/finitact-mcp-windows.sh); it forwards the keys through `WSLENV`.
+[`scripts/finitact-mcp-windows.sh`](scripts/finitact-mcp-windows.sh). The script forwards the keys through `WSLENV`.
 
 ### Tools
 
@@ -215,15 +215,15 @@ From a client running in WSL, set `FINITACT_WINDOWS_PYTHON` in `.env` to that `p
 |---|---|
 | `list_windows` | Targets as `window:<HWND>:<PID>` |
 | `observe_window` / `observe_browser` | Read-only candidates with `ref`s |
-| `run_windows` / `run_browser` | Execute ordered goals; returns per-goal `outcome` |
+| `run_windows` / `run_browser` | Execute ordered goals and return the per-goal `outcome` |
 | `get_run_journal` / `cancel_run` | Inspect or stop a run |
 
-Treat `confirmed` as "input was sent", not "goal succeeded"; read `outcome`. Replaying the same `run_id` with the
+Treat `confirmed` as "input was sent", not "goal succeeded". Read `outcome`. Replaying the same `run_id` with the
 same input returns the cached result without repeating input.
 
 ## Safety and limits
 
-- Mouse and keyboard input starts only after one second without user input and while an on-screen indicator is shown. Each run is
+- Mouse and keyboard input starts only after one second without user input and while an on-screen indicator is visible. Each run is
   bounded by a deadline, an action budget and a budget of decision-model calls. Ending the server process stops a run.
 - Input is never resent automatically. If it is unclear whether input arrived, the server refuses further input
   until it restarts.
@@ -241,7 +241,7 @@ uv build
 
 Live evaluation scripts under `scripts/` drive real windows and make paid API calls.
 
-Design records (`docs/adr/`, `docs/bugs/`) and the specification are written in Japanese; this README, the evaluation report,
+Design records (`docs/adr/`, `docs/bugs/`) and the specification are in Japanese. This README, the evaluation report,
 [decisions.md](docs/decisions.md) and [known-issues.md](docs/known-issues.md) are
 in English.
 

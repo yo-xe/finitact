@@ -66,7 +66,7 @@ Where each model went wrong (count out of 10):
 | many-decoys | | | Northern Europe (10) |
 | scale-60 | | | `BLOCKED` (10) |
 
-The live click-only task opens a region dropdown on a local page and picks an option; success is read from the page
+The live click-only task opens a region dropdown on a local page and picks an option. Success is read from the page
 state, not from the model. Qwen reached the outcome but kept clicking instead of stopping, and Laya reopened the
 dropdown and then gave up. Laya is deterministic here (the same choice in all 10 runs) and warns at start-up that its
 confidence is not calibrated.
@@ -87,12 +87,12 @@ progress or safety:
 - **Safety checks stay in Finitact.** In an earlier experiment Jev judged whether a region is an input field 82% of
   the time correctly, and whether a popup is transient 75%, so Finitact decides executability from observed evidence
   and checks the target again just before sending input ([ADR-0030](../adr/0030-finitact-jev.md)).
-- **Local models are not a drop-in replacement.** Qwen is three times slower and never stops by itself; Laya is fast
+- **Local models are not a drop-in replacement.** Qwen is three times slower and never stops by itself. Laya is fast
   but misses traps Jev handles. A local option would need the same outside checks, plus its own stop rule.
 
 ## Limits
 
-- 13 synthetic cases test known traps; they do not estimate accuracy on real screens. The in-task Jev call counts and
+- 13 synthetic cases test known traps. They do not estimate accuracy on real screens. The in-task Jev call counts and
   tokens are in [benchmark.md](benchmark.md#jev-usage-inside-finitact).
-- Jev is a hosted model that changes without notice (`jev-latest`); these numbers hold for 2026-09-30.
-- Only one live task, and it is click-only; text entry was out of scope for this comparison.
+- Jev is a hosted model that changes without notice (`jev-latest`). These numbers hold for 2026-09-30.
+- Only one live task, and it is click-only. Text entry was out of scope for this comparison.

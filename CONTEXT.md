@@ -17,7 +17,7 @@ A boundary that observes one interface type and executes selected actions agains
 _Avoid_: Driver, backend
 
 **Outcome verifier**:
-An independent check of task success; selecting `DONE` is not verification.
+An independent check of task success. Selecting `DONE` is not verification.
 _Avoid_: DONE check
 
 **Click label constraint**:
