@@ -127,6 +127,24 @@ sequenceDiagram
     F-->>A: per-goal outcome
 ```
 
+## When a run fails
+
+Finitact has no automatic fallback. It never re-sends an input on its own and never switches routes on its own.
+Each result tells the calling agent why the run stopped, and the agent decides how to recover.
+
+| In the result | What the agent can do |
+|---|---|
+| `termination_reason: provider_uncertain` | Pick one of `screen_candidates` with the goal's `ref`, or reword the goal, and call again ([ADR-0022](docs/adr/0022-provider-uncertain-agent.md), [ADR-0043](docs/adr/0043-jev-goal-ref.md)). |
+| `outcome: unverified` | Check the state with `screen_changes`, `observe_window` or `observe_browser` before you continue. |
+| `final_state.out_of_reach` with `screen_target` | Call `run_windows` on `screen_target` ([ADR-0048](docs/adr/0048-browser-boundary-screen-handoff.md)). |
+| `status: partial` or `stopped` with `remaining_goal_ids` | Send a new run with only the remaining goals. |
+| `termination_reason: budget` or `deadline` | Call again with a larger budget or a later deadline. |
+| No response | Call again with the same `run_id` and the same input. Finitact returns the stored result and does not repeat the input. |
+| `mutation_state: uncertain` | Do not retry under a new `run_id` until a human or an independent check confirms the state. |
+
+`get_run_journal` returns the record of a run, and `cancel_run` stops a run. Finitact does not include a second
+computer-use method. If Finitact cannot do a task, the agent must use its own tools, for example a shell or another MCP server.
+
 ## Results
 
 Measured on 2026-10-04 with Claude Code and `claude-sonnet-5-5` as the calling agent, one Finitact commit, and the

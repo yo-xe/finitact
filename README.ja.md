@@ -117,6 +117,24 @@ sequenceDiagram
     F-->>A: goalごとの結果
 ```
 
+## runが失敗した時
+
+Finitactに自動のfallbackは無い。入力を自分で再送せず、経路も自分で切り替えない。
+結果は止まった理由を返し、どう立て直すかは呼び出し元のエージェントが決める。
+
+| 結果に出るもの | エージェントが取れる手 |
+|---|---|
+| `termination_reason: provider_uncertain` | `screen_candidates`の1つをgoalの`ref`で指定するか、goalを言い換えて呼び直す([ADR-0022](docs/adr/0022-provider-uncertain-agent.md)、[ADR-0043](docs/adr/0043-jev-goal-ref.md))。 |
+| `outcome: unverified` | 続ける前に`screen_changes`・`observe_window`・`observe_browser`で状態を確かめる。 |
+| `final_state.out_of_reach`と`screen_target` | `screen_target`に対して`run_windows`を呼ぶ([ADR-0048](docs/adr/0048-browser-boundary-screen-handoff.md))。 |
+| `status: partial`または`stopped`と`remaining_goal_ids` | 残ったgoalだけで新しいrunを送る。 |
+| `termination_reason: budget`または`deadline` | 予算を増やすか期限を延ばして呼び直す。 |
+| 応答が返らない | 同じ`run_id`・同じ入力で呼び直す。保存済みの結果が返り、入力は繰り返さない。 |
+| `mutation_state: uncertain` | 人間か独立した確認で状態が分かるまで、新しい`run_id`で再試行しない。 |
+
+`get_run_journal`はrunの記録を返し、`cancel_run`はrunを止める。Finitactは別のcomputer use手段を同梱しない。
+Finitactでできない作業は、エージェントが自分の道具(shellや別のMCP serverなど)で行う。
+
 ## 結果
 
 2026-10-04計測。呼び出し元はClaude Code・`claude-sonnet-5-5`、Finitactは単一commit、promptは両系同一。
