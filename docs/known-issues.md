@@ -6,7 +6,7 @@ The bug records in `docs/bugs/` are written in Japanese and are append-only; the
 each bug was found. This page explains the open issues by their effect on users and indexes the fixed ones by area.
 Please report new problems as GitHub issues.
 
-## Open (7)
+## Open (9)
 
 ### Issues that affect using Finitact
 
@@ -26,12 +26,21 @@ Please report new problems as GitHub issues.
 - **[BUG-0074](bugs/0074-bug-0043-run-browser-run-runti.md) The first `run_browser` call can fail while its helper daemon starts (low)**
   The first run fails with `RuntimeError('listening on 127.0.0.1:…')`. Calling again with the same request succeeds.
   A recurrence of [BUG-0043](bugs/0043-run-browser-run-daemon-64-runt.md).
+- **[BUG-0076](bugs/0076-typesafe-httpx-httperror-run-e.md) A connection error to Jev's API stops the run without a retry (medium)**
+  HTTP 429/503/529 are retried, but a connection error is raised at once and the run ends with
+  `Model connection failed; no action executed.` Nothing was sent to the target, so calling again with a new `run_id`
+  is safe.
+- **[BUG-0077](bugs/0077-windows-interaction-lease-wait.md) After a run is killed mid-input, every later `run_windows` fails (medium)**
+  Windows runs share a system-wide input mutex. If the process holding it is killed, the next run receives the
+  abandoned mutex, raises `interaction lease owner exited unexpectedly` without releasing it, and every later run,
+  even in a new process, fails the same way. Restarting does not clear it; a one-off script that waits on the mutex
+  and releases it does.
 
 ### Issues in the evaluation and the compared tool (Finitact's behaviour is not affected)
 
 - **[BUG-0071](bugs/0071-e2e-04-oracle.md) The E2E-04 (taskbar → search → article) judge passed a trial that skipped the search (high)**
-  Route evidence is now `pass/fail/unknown`, and old results without an independent `pass` were withdrawn. E2E-04
-  numbers are not published until they are retaken.
+  Route evidence is now `pass/fail/unknown`, and old results without an independent `pass` were withdrawn. The
+  published E2E-04 numbers are the 2026-10-04 retake, where a trial counts as a success only with a `pass` route.
 - **[BUG-0062](bugs/0062-e2e-04-edge-uia-found-false-wi.md) The E2E-04 judge misses the end of an Edge article through UIA and fails a successful trial (medium)**
   Re-scanning was added, but no trial has needed it yet, so the fix is unconfirmed.
 - **[BUG-0063](bugs/0063-c2-e2e-05-windows-mcp-batch-09.md) The compared tool's (windows-mcp) `Type` typed into the operator's terminal (medium)**

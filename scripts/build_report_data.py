@@ -17,30 +17,22 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "docs" / "report" / "data"
 
-# 2026-10-03 single snapshot. A provider halt or the outer 5h limit stopped a batch mid-way, so each system's
-# trials span several resumed dirs; trials an outer usage limit cut off are invalid (BUG-0070) and stay out.
+# 2026-10-04 single snapshot (b3c1b74). Batches resumed after halts span several dirs; trials an outer usage limit
+# cut off (BUG-0070) or a provider connection failure stopped before any UI action (BUG-0076) are invalid and stay out.
 C1_DIRS = {
-    "finitact": [f"c1-20261003-finitact{s}" for s in ("", "-r2", "-r3", "-r4", "-r5")],
-    "windows-mcp": [f"c1-20261003-windows-mcp{s}" for s in ("", "-r2", "-r3")],
-}
-# The first Blender trials ran beside a manually opened same-name Blender, which breaks the single-window case
-# condition; both systems were retaken without it (public-benchmark-20261003.md), and only the retake counts.
-C1_RETAKEN = {"screen-blender-select-mode-001", "screen-blender-workspace-001"}
-C1_RETAKE_DIRS = {
-    "finitact": ["c1-20261003b-finitact", "c1-20261003b-finitact-r2", "c1-20261003b-finitact-r3"],
-    "windows-mcp": ["c1-20261003b-windows-mcp"],
+    "finitact": [f"c1-20261004-finitact{s}" for s in ("", "-r2", "-r3", "-r4", "-r5", "-r6", "-r7-1", "-r7-2", "-r7-3")]
+    + [f"c1-20261004-blender-finitact{s}" for s in ("", "-r2", "-r3")],
+    "windows-mcp": ["c1-20261004-windows-mcp", "c1-20261004-windows-mcp-r2", "c1-20261004-blender-windows-mcp"],
 }
 
-# E2E-03 finitact and E2E-04 are the -r2 reruns after launcher faults that stopped before any trial.
+# Same 2026-10-04 snapshot as C1. Voided sets were renamed to -void-*, so a row counts only while its stream file
+# still exists in a listed dir; that drops voided rows that recorded the pre-rename dir name.
 C2_SETS = {
-    (f"E2E-0{n}", system): f"c2-20261003-E2E-0{n}-{system}" for n in range(1, 6) for system in ("finitact", "windows-mcp")
+    (f"E2E-0{n}", system): [f"c2-20261004-E2E-0{n}-{system}"] for n in range(1, 6) for system in ("finitact", "windows-mcp")
 }
-for key in (("E2E-03", "finitact"), ("E2E-04", "finitact"), ("E2E-04", "windows-mcp")):
-    C2_SETS[key] += "-r2"
-# Retaken from an empty desk: the first set started with other windows maximized over it, unlike the control.
-C2_SETS[("E2E-01", "finitact")] = "c2-20261003b-E2E-01-finitact"
-# Only E2E-02 Finitact was retaken after the window-to-browser route was fixed on (ADR-0052, e2e02-route-20261004.md).
-C2_SETS[("E2E-02", "finitact")] = "e2e02-route-20261004d"
+C2_SETS[("E2E-02", "windows-mcp")].append("c2-20261004-E2E-02-windows-mcp-r2")
+C2_SETS[("E2E-04", "finitact")].append("c2-20261004-E2E-04-finitact-r3")
+C2_TRIALS = 5
 
 OUTER_KEYS = ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens", "output_tokens")
 # USD per token. Sonnet 5.5 with the 1h cache write Claude Code uses (its cost_usd reproduces at $4, not $2.50).
@@ -78,12 +70,11 @@ def code_at(commits: list[tuple[int, str]], epoch: int) -> str:
 def build_c1(phase_i: Path, commits) -> list[dict]:
     rows = []
     trials: dict[tuple[str, str], int] = defaultdict(int)
-    sources = [(system, phase_i / d / "records.jsonl", False) for system, dirs in C1_DIRS.items() for d in dirs]
-    sources += [(system, phase_i / d / "records.jsonl", True) for system, dirs in C1_RETAKE_DIRS.items() for d in dirs]
-    for system, path, retake in sources:
+    sources = [(system, phase_i / d / "records.jsonl") for system, dirs in C1_DIRS.items() for d in dirs]
+    for system, path in sources:
         for line in path.read_text(encoding="utf-8").splitlines():
             r = json.loads(line)
-            if "limit" in (r.get("harness_halt") or "") or (r["case_id"] in C1_RETAKEN) != retake:
+            if not r.get("valid", True) or "limit" in (r.get("harness_halt") or ""):
                 continue
             case_id = r["case_id"]
             trials[(case_id, system)] += 1
@@ -155,21 +146,27 @@ def build_codex_c1(phase_i: Path) -> list[dict]:
 
 def build_c2(commits) -> list[dict]:
     rows = []
+    trials: dict[tuple[str, str], int] = defaultdict(int)
     for line in (ROOT / "docs/evaluations/e2e-live/results.jsonl").read_text(encoding="utf-8").splitlines():
         r = json.loads(line)
         set_dir = (r.get("stream") or "").split("/")[-2:-1]
-        if not set_dir or C2_SETS.get((r["scenario"], r["tool"])) != set_dir[0]:
+        key = (r["scenario"], r["tool"])
+        if not set_dir or set_dir[0] not in C2_SETS.get(key, []) or r.get("valid") is False:
             continue
-        if r["scenario"] == "E2E-04" and (r.get("oracle") or {}).get("route", {}).get("status") != "pass":
+        if not Path(r["stream"]).exists():
+            continue
+        # A failed trial with an unproven route is still a valid failure; only a success needs the proof.
+        if r["scenario"] == "E2E-04" and r["success"] and (r.get("oracle") or {}).get("route", {}).get("status") != "pass":
             raise ValueError("E2E-04 export requires independently verified search route (BUG-0071)")
         provider = r.get("finitact_provider_tokens") or {}
         epoch = int(Path(r["stream"]).name.split("-")[-1].split(".")[0])
+        trials[key] += 1
         rows.append(
             {
                 "suite": "C2",
                 "case": r["scenario"],
                 "system": r["tool"],
-                "trial": r["trial"],
+                "trial": trials[key],
                 "verdict": "success" if r["success"] else "failure",
                 "wall_s": r["seconds"],
                 "outer_tokens": r["outer_tokens"],
@@ -185,6 +182,9 @@ def build_c2(commits) -> list[dict]:
                 "finitact_commit": code_at(commits, epoch) if r["tool"] == "finitact" else None,
             }
         )
+    short = {k: n for k in C2_SETS if (n := trials[k]) != C2_TRIALS}
+    if short:
+        raise ValueError(f"C2 sets without exactly {C2_TRIALS} valid trials: {short}")
     return sorted(rows, key=lambda x: (x["case"], x["system"], x["trial"]))
 
 

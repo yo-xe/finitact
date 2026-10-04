@@ -35,48 +35,48 @@
 <text class="tick" x="630.0" y="496" text-anchor="middle">100k</text>
 <line class="axis" x1="210" y1="72" x2="210" y2="480"/>
 <text class="label" x="200" y="97" text-anchor="end">Notepad: fill text</text>
-<path class="s1" d="M210.0,78.0 H250.3 Q254.3,78.0 254.3,82.0 V88.0 Q254.3,92.0 250.3,92.0 H210.0 Z"><title>Finitact, Notepad: fill text: median 10.6k tokens, success 10/10</title></path>
-<text class="value" x="260.3" y="89">10.6k</text>
-<path class="s2" d="M210.0,94.0 H345.1 Q349.1,94.0 349.1,98.0 V104.0 Q349.1,108.0 345.1,108.0 H210.0 Z"><title>windows-mcp, Notepad: fill text: median 33.1k tokens, success 10/10</title></path>
-<text class="value" x="355.1" y="105">33.1k</text>
+<path class="s1" d="M210.0,78.0 H257.1 Q261.1,78.0 261.1,82.0 V88.0 Q261.1,92.0 257.1,92.0 H210.0 Z"><title>Finitact, Notepad: fill text: median 12.2k tokens, success 10/10</title></path>
+<text class="value" x="267.1" y="89">12.2k</text>
+<path class="s2" d="M210.0,94.0 H379.9 Q383.9,94.0 383.9,98.0 V104.0 Q383.9,108.0 379.9,108.0 H210.0 Z"><title>windows-mcp, Notepad: fill text: median 41.4k tokens, success 10/10</title></path>
+<text class="value" x="389.9" y="105">41.4k</text>
 <text class="label" x="200" y="141" text-anchor="end">Calculator: press 7</text>
-<path class="s1" d="M210.0,122.0 H249.8 Q253.8,122.0 253.8,126.0 V132.0 Q253.8,136.0 249.8,136.0 H210.0 Z"><title>Finitact, Calculator: press 7: median 10.4k tokens, success 10/10</title></path>
-<text class="value" x="259.8" y="133">10.4k</text>
-<path class="s2" d="M210.0,138.0 H329.6 Q333.6,138.0 333.6,142.0 V148.0 Q333.6,152.0 329.6,152.0 H210.0 Z"><title>windows-mcp, Calculator: press 7: median 29.4k tokens, success 10/10</title></path>
-<text class="value" x="339.6" y="149">29.4k</text>
+<path class="s1" d="M210.0,122.0 H256.5 Q260.5,122.0 260.5,126.0 V132.0 Q260.5,136.0 256.5,136.0 H210.0 Z"><title>Finitact, Calculator: press 7: median 12.0k tokens, success 10/10</title></path>
+<text class="value" x="266.5" y="133">12.0k</text>
+<path class="s2" d="M210.0,138.0 H329.4 Q333.4,138.0 333.4,142.0 V148.0 Q333.4,152.0 329.4,152.0 H210.0 Z"><title>windows-mcp, Calculator: press 7: median 29.4k tokens, success 10/10</title></path>
+<text class="value" x="339.4" y="149">29.4k</text>
 <text class="label" x="200" y="185" text-anchor="end">VS Code: replace text, save</text>
-<path class="s1" d="M210.0,166.0 H253.6 Q257.6,166.0 257.6,170.0 V176.0 Q257.6,180.0 253.6,180.0 H210.0 Z"><title>Finitact, VS Code: replace text, save: median 11.3k tokens, success 10/10</title></path>
-<text class="value" x="263.6" y="177">11.3k</text>
-<path class="s2" d="M210.0,182.0 H578.1 Q582.1,182.0 582.1,186.0 V192.0 Q582.1,196.0 578.1,196.0 H210.0 Z"><title>windows-mcp, VS Code: replace text, save: median 88.6k tokens, success 10/10</title></path>
-<text class="value" x="588.1" y="193">88.6k</text>
+<path class="s1" d="M210.0,166.0 H260.2 Q264.2,166.0 264.2,170.0 V176.0 Q264.2,180.0 260.2,180.0 H210.0 Z"><title>Finitact, VS Code: replace text, save: median 12.9k tokens, success 10/10</title></path>
+<text class="value" x="270.2" y="177">12.9k</text>
+<path class="s2" d="M210.0,182.0 H560.1 Q564.1,182.0 564.1,186.0 V192.0 Q564.1,196.0 560.1,196.0 H210.0 Z"><title>windows-mcp, VS Code: replace text, save: median 84.3k tokens, success 10/10</title></path>
+<text class="value" x="570.1" y="193">84.3k</text>
 <text class="label" x="200" y="229" text-anchor="end">Tk: scroll list, select row</text>
-<path class="s1" d="M210.0,210.0 H303.4 Q307.4,210.0 307.4,214.0 V220.0 Q307.4,224.0 303.4,224.0 H210.0 Z"><title>Finitact, Tk: scroll list, select row: median 23.2k tokens, success 10/10</title></path>
-<text class="value" x="313.4" y="221">23.2k</text>
-<path class="s2" d="M210.0,226.0 H486.2 Q490.2,226.0 490.2,230.0 V236.0 Q490.2,240.0 486.2,240.0 H210.0 Z"><title>windows-mcp, Tk: scroll list, select row: median 66.7k tokens, success 10/10</title></path>
-<text class="value" x="496.2" y="237">66.7k</text>
+<path class="s1" d="M210.0,210.0 H316.6 Q320.6,210.0 320.6,214.0 V220.0 Q320.6,224.0 316.6,224.0 H210.0 Z"><title>Finitact, Tk: scroll list, select row: median 26.3k tokens, success 10/10</title></path>
+<text class="value" x="326.6" y="221">26.3k</text>
+<path class="s2" d="M210.0,226.0 H485.1 Q489.1,226.0 489.1,230.0 V236.0 Q489.1,240.0 485.1,240.0 H210.0 Z"><title>windows-mcp, Tk: scroll list, select row: median 66.5k tokens, success 10/10</title></path>
+<text class="value" x="495.1" y="237">66.5k</text>
 <text class="label" x="200" y="273" text-anchor="end">Tk: drag card to zone</text>
-<path class="s1" d="M210.0,254.0 H250.8 Q254.8,254.0 254.8,258.0 V264.0 Q254.8,268.0 250.8,268.0 H210.0 Z"><title>Finitact, Tk: drag card to zone: median 10.7k tokens, success 10/10</title></path>
-<text class="value" x="260.8" y="265">10.7k</text>
-<path class="s2" d="M210.0,270.0 H361.5 Q365.5,270.0 365.5,274.0 V280.0 Q365.5,284.0 361.5,284.0 H210.0 Z"><title>windows-mcp, Tk: drag card to zone: median 37.0k tokens, success 10/10</title></path>
-<text class="value" x="371.5" y="281">37.0k</text>
+<path class="s1" d="M210.0,254.0 H257.5 Q261.5,254.0 261.5,258.0 V264.0 Q261.5,268.0 257.5,268.0 H210.0 Z"><title>Finitact, Tk: drag card to zone: median 12.3k tokens, success 10/10</title></path>
+<text class="value" x="267.5" y="265">12.3k</text>
+<path class="s2" d="M210.0,270.0 H390.5 Q394.5,270.0 394.5,274.0 V280.0 Q394.5,284.0 390.5,284.0 H210.0 Z"><title>windows-mcp, Tk: drag card to zone: median 43.9k tokens, success 10/10</title></path>
+<text class="value" x="400.5" y="281">43.9k</text>
 <text class="label" x="200" y="317" text-anchor="end">Unity: open dropdown</text>
-<path class="s1" d="M210.0,298.0 H250.6 Q254.6,298.0 254.6,302.0 V308.0 Q254.6,312.0 250.6,312.0 H210.0 Z"><title>Finitact, Unity: open dropdown: median 10.6k tokens, success 10/10</title></path>
-<text class="value" x="260.6" y="309">10.6k</text>
-<path class="s2" d="M210.0,314.0 H353.1 Q357.1,314.0 357.1,318.0 V324.0 Q357.1,328.0 353.1,328.0 H210.0 Z"><title>windows-mcp, Unity: open dropdown: median 35.0k tokens, success 10/10</title></path>
-<text class="value" x="363.1" y="325">35.0k</text>
+<path class="s1" d="M210.0,298.0 H257.4 Q261.4,298.0 261.4,302.0 V308.0 Q261.4,312.0 257.4,312.0 H210.0 Z"><title>Finitact, Unity: open dropdown: median 12.2k tokens, success 10/10</title></path>
+<text class="value" x="267.4" y="309">12.2k</text>
+<path class="s2" d="M210.0,314.0 H317.7 Q321.7,314.0 321.7,318.0 V324.0 Q321.7,328.0 317.7,328.0 H210.0 Z"><title>windows-mcp, Unity: open dropdown: median 26.6k tokens, success 10/10</title></path>
+<text class="value" x="327.7" y="325">26.6k</text>
 <text class="label" x="200" y="361" text-anchor="end">Unity: select resolution</text>
-<path class="s1" d="M210.0,342.0 H251.8 Q255.8,342.0 255.8,346.0 V352.0 Q255.8,356.0 251.8,356.0 H210.0 Z"><title>Finitact, Unity: select resolution: median 10.9k tokens, success 9/10</title></path>
-<text class="value" x="261.8" y="353">10.9k  (9/10)</text>
-<path class="s2" d="M210.0,358.0 H427.4 Q431.4,358.0 431.4,362.0 V368.0 Q431.4,372.0 427.4,372.0 H210.0 Z"><title>windows-mcp, Unity: select resolution: median 52.7k tokens, success 10/10</title></path>
-<text class="value" x="437.4" y="369">52.7k</text>
+<path class="s1" d="M210.0,342.0 H284.4 Q288.4,342.0 288.4,346.0 V352.0 Q288.4,356.0 284.4,356.0 H210.0 Z"><title>Finitact, Unity: select resolution: median 18.7k tokens, success 10/10</title></path>
+<text class="value" x="294.4" y="353">18.7k</text>
+<path class="s2" d="M210.0,358.0 H421.9 Q425.9,358.0 425.9,362.0 V368.0 Q425.9,372.0 421.9,372.0 H210.0 Z"><title>windows-mcp, Unity: select resolution: median 51.4k tokens, success 10/10</title></path>
+<text class="value" x="431.9" y="369">51.4k</text>
 <text class="label" x="200" y="405" text-anchor="end">Blender: switch workspace</text>
-<path class="s1" d="M210.0,386.0 H275.6 Q279.6,386.0 279.6,390.0 V396.0 Q279.6,400.0 275.6,400.0 H210.0 Z"><title>Finitact, Blender: switch workspace: median 16.6k tokens, success 10/10</title></path>
-<text class="value" x="285.6" y="397">16.6k</text>
-<path class="s2" d="M210.0,402.0 H352.6 Q356.6,402.0 356.6,406.0 V412.0 Q356.6,416.0 352.6,416.0 H210.0 Z"><title>windows-mcp, Blender: switch workspace: median 34.9k tokens, success 10/10</title></path>
-<text class="value" x="362.6" y="413">34.9k</text>
+<path class="s1" d="M210.0,386.0 H286.0 Q290.0,386.0 290.0,390.0 V396.0 Q290.0,400.0 286.0,400.0 H210.0 Z"><title>Finitact, Blender: switch workspace: median 19.0k tokens, success 10/10</title></path>
+<text class="value" x="296.0" y="397">19.0k</text>
+<path class="s2" d="M210.0,402.0 H317.8 Q321.8,402.0 321.8,406.0 V412.0 Q321.8,416.0 317.8,416.0 H210.0 Z"><title>windows-mcp, Blender: switch workspace: median 26.6k tokens, success 10/10</title></path>
+<text class="value" x="327.8" y="413">26.6k</text>
 <text class="label" x="200" y="449" text-anchor="end">Blender: select mode</text>
-<path class="s1" d="M210.0,430.0 H254.5 Q258.5,430.0 258.5,434.0 V440.0 Q258.5,444.0 254.5,444.0 H210.0 Z"><title>Finitact, Blender: select mode: median 11.5k tokens, success 10/10</title></path>
-<text class="value" x="264.5" y="441">11.5k</text>
-<path class="s2" d="M210.0,446.0 H382.4 Q386.4,446.0 386.4,450.0 V456.0 Q386.4,460.0 382.4,460.0 H210.0 Z"><title>windows-mcp, Blender: select mode: median 42.0k tokens, success 10/10</title></path>
-<text class="value" x="392.4" y="457">42.0k</text>
+<path class="s1" d="M210.0,430.0 H293.4 Q297.4,430.0 297.4,434.0 V440.0 Q297.4,444.0 293.4,444.0 H210.0 Z"><title>Finitact, Blender: select mode: median 20.8k tokens, success 9/10</title></path>
+<text class="value" x="303.4" y="441">20.8k  (9/10)</text>
+<path class="s2" d="M210.0,446.0 H382.2 Q386.2,446.0 386.2,450.0 V456.0 Q386.2,460.0 382.2,460.0 H210.0 Z"><title>windows-mcp, Blender: select mode: median 42.0k tokens, success 10/10</title></path>
+<text class="value" x="392.2" y="457">42.0k</text>
 </svg>

@@ -302,6 +302,16 @@ def usage_limit(summary: Mapping[str, Any]) -> str | None:
     return None
 
 
+def provider_unreachable(summary: Mapping[str, Any]) -> str | None:
+    """A Finitact goal that never reached its provider executed nothing, so it is no UI trial (BUG-0076)."""
+
+    for run in summary.get("finitact_runs") or ():
+        for goal in run.get("goals") or ():
+            if goal.get("termination_reason") == "error" and "Model connection failed" in str(goal.get("detail")):
+                return "Finitact provider connection failed"
+    return None
+
+
 def halt_reason(system: str, summary: Mapping[str, Any]) -> str | None:
     """Why the batch must stop after this run instead of starting the next trial.
 

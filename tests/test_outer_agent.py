@@ -9,6 +9,7 @@ from finitact.outer_agent import (
     build_prompt,
     halt_reason,
     mcp_config,
+    provider_unreachable,
     summarize_stream,
     to_wsl_path,
     tool_policy,
@@ -188,6 +189,14 @@ def test_weekly_limit_is_excluded_despite_success_subtype():
     assert usage_limit(summary) == "outer agent weekly limit"
     assert halt_reason(FINITACT, summary) == "outer agent weekly limit"
     assert usage_limit({**summary, "is_error": False}) is None
+
+
+def test_provider_connection_failure_is_excluded_but_other_errors_are_not():
+    detail = "RuntimeError: Model connection failed; no action executed."
+    assert provider_unreachable(_goal(termination_reason="error", detail=detail)) == "Finitact provider connection failed"
+    invalid = "ValueError: Invalid TypeSafe response; no action executed."
+    assert provider_unreachable(_goal(termination_reason="error", detail=invalid)) is None
+    assert provider_unreachable(_goal(termination_reason="blocked", detail=detail)) is None
 
 
 def test_windows_paths_map_under_mnt():

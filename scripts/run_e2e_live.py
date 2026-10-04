@@ -1359,6 +1359,8 @@ def main() -> None:
     if args.system == outer_agent.FINITACT:
         # Inherited by the outer agent and the wrapper, the same path the operator's shell used in e2e02-route.
         os.environ.update(outer_agent.FINITACT_BENCHMARK_ENV)
+        # Without it the route probe fails and every run silently stays on the screen path (2026-10-04 C2 E2E-02).
+        os.environ.setdefault("BU_CDP_URL", CDP)
         # The registered wrapper loads .env and WSLENV itself; the Phase I config assumed a Windows parent.
         config = {"mcpServers": {outer_agent.FINITACT: {"type": "stdio", "command": str(FINITACT_WRAPPER)}}}
         if "proxy" in SCENARIOS[args.scenario]:
@@ -1448,6 +1450,8 @@ def main() -> None:
         stream_lines = stream_path.read_text(encoding="utf-8").splitlines()
         if limit := outer_agent.usage_limit(summary):
             record.update(valid=False, excluded=limit)
+        elif unreachable := outer_agent.provider_unreachable(summary):
+            record.update(valid=False, excluded=unreachable)
         if args.outer == "codex":
             per_turn = outer_codex.steps(stream_lines, wall_ms=summary["wall_ms"])
             if not limit and outer_codex.transport_closed(summary):

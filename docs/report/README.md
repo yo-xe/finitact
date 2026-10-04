@@ -1,7 +1,7 @@
 # Evaluation report
 
 Measured on one Windows 11 desktop (Ryzen 7 7700, 24 GiB RAM, RTX 5070 12 GiB): the Claude Sonnet cohort on
-2026-10-03 at one Finitact commit, the Codex Luna cohort on 2026-10-01.
+2026-10-04 at one Finitact commit, the Codex Luna cohort on 2026-10-01.
 
 - [benchmark.md](benchmark.md): Finitact versus [windows-mcp](https://github.com/CursorTouch/Windows-MCP) on 9 short
   Windows tasks (N=10 per system, separate Claude Sonnet and Codex Luna cohorts) and 5 multi-step tasks

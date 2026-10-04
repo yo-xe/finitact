@@ -5,7 +5,7 @@
 不具合の原本(`docs/bugs/`、日本語)は追記のみで、発見時の再現記録をそのまま残す。本書は未修正の問題を利用者への影響で
 説明し、修正済みの記録を領域別に索引する。新しい問題はGitHub issueで報告してほしい。
 
-## 未修正(7件)
+## 未修正(9件)
 
 ### Finitactの利用に影響するもの
 
@@ -22,11 +22,18 @@
   tabを前面化すると直るが、同じChromeの他のtabを隠すため製品の修正にしていない。スクロール後に次の観測で位置を確かめること。
 - **[BUG-0074](bugs/0074-bug-0043-run-browser-run-runti.md) `run_browser`の初回が内部daemonの起動待ちで失敗することがある(低)**
   初回のrunが`RuntimeError('listening on 127.0.0.1:…')`で失敗する。同じ要求を再度呼ぶと通る。[BUG-0043](bugs/0043-run-browser-run-daemon-64-runt.md)の再発。
+- **[BUG-0076](bugs/0076-typesafe-httpx-httperror-run-e.md) JevのAPIへの接続失敗で再試行せずrunが止まる(中)**
+  HTTP 429/503/529は再試行するが、接続例外は即座に送出され`Model connection failed; no action executed.`で終わる。
+  対象へは何も送っていないので、新しい`run_id`で呼び直してよい。
+- **[BUG-0077](bugs/0077-windows-interaction-lease-wait.md) 入力中のrunを強制終了すると以後の`run_windows`が全て失敗する(中)**
+  Windowsのrunはシステム全体の入力mutexを共有する。保持中のprocessが殺されると、次のrunがabandonedのmutexを受け取り、
+  解放せずに`interaction lease owner exited unexpectedly`を送出するため、新しいprocessでも以後のrunが同じく失敗する。
+  再起動では解消せず、mutexを一度待って解放する単発scriptで解消する。
 
 ### 評価と比較対象に関するもの(Finitactの動作には影響しない)
 
 - **[BUG-0071](bugs/0071-e2e-04-oracle.md) E2E-04(taskbar→検索→記事)の判定器が検索を飛ばした試行を成功とする(高)**
-  経路の証拠を`pass/fail/unknown`に分け、独立した`pass`の無い旧成績は撤回した。E2E-04の数値は取り直すまで公開しない。
+  経路の証拠を`pass/fail/unknown`に分け、独立した`pass`の無い旧成績は撤回した。公開しているE2E-04の数値は2026-10-04の取り直しで、経路が`pass`の試行だけを成功とする。
 - **[BUG-0062](bugs/0062-e2e-04-edge-uia-found-false-wi.md) E2E-04の判定器がEdgeの記事末尾をUIAで見落とし、成功を失敗とする(中)**
   再走査を足したが、効いた試行がまだ無く効果は未確認。
 - **[BUG-0063](bugs/0063-c2-e2e-05-windows-mcp-batch-09.md) 比較対象(windows-mcp)の`Type`が操作者の端末へ入力された(中)**

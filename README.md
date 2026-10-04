@@ -28,7 +28,7 @@ bit more capability and cost-efficiency.
   apps (including Blender and Unity, which expose almost no accessibility information), and it got nowhere on the
   AWS Pricing Calculator, one of the websites that annoys me most.
 - **Cost.** windows-mcp has everything computer use needs, but it burns tokens. On nine short Windows tasks the
-  calling agent used 2.1× to 7.8× more tokens with windows-mcp than with Finitact ([results](#results)), because every
+  calling agent used 1.4× to 6.5× more tokens with windows-mcp than with Finitact ([results](#results)), because every
   observation returns a desktop snapshot that stays in its context.
 
 So I tried an implementation where the expensive agent decides *what* to do in a few words, and a cheap, fast model
@@ -129,16 +129,18 @@ sequenceDiagram
 
 ## Results
 
-Measured on 2026-10-03 with Claude Code and `claude-sonnet-5-5` as the calling agent, one Finitact commit, and the
-same prompt for both systems; the AWS task's Finitact trials were retaken on 2026-10-04 with the browser route on. Details and limits are in [docs/report/](docs/report/).
+Measured on 2026-10-04 with Claude Code and `claude-sonnet-5-5` as the calling agent, one Finitact commit, and the
+same prompt for both systems. Details and limits are in [docs/report/](docs/report/).
 
 - 9 short Windows tasks (Notepad, Calculator, VS Code, Tk, Unity, Blender), 10 trials each: windows-mcp succeeded 10/10
-  on every task, Finitact 10/10 on 8 and 9/10 on one (a Jev connection failure). Finitact was faster on 7 of 9, and
-  the calling agent used 2.1× to 7.8× fewer tokens with it on all 9.
-- 5 multi-step tasks, 5 trials each: windows-mcp succeeded 5/5 on all. Finitact succeeded 5/5 on four and 4/5 on the chat
-  task. The calling agent used fewer tokens with Finitact on four (1.3× to 3.2×) and more on one (1.3×).
+  on every task, Finitact 10/10 on 8 and 9/10 on one (Blender, a menu left open). Finitact was faster on 7 of 9, and
+  the calling agent used 1.4× to 6.5× fewer tokens with it on all 9.
+- 5 multi-step tasks, 5 trials each: Finitact succeeded 5/5 on all. windows-mcp succeeded 5/5 on four and 4/5 on the
+  Wikipedia task (the search route could not be shown). The calling agent used fewer tokens with Finitact on four
+  (1.4× to 2.6×) and more on one (1.4×).
 - Finitact's own calls to Jev are not in these token counts. Counting them at list prices, a trial still cost less
-  with Finitact on all 14 tasks (1.5× to 6.4× short, 1.2× to 2.1× multi-step; see the report).
+  with Finitact on 13 of 14 tasks (1.3× to 6.3× short, 1.4× to 1.9× multi-step) and 1.1× more on the Wikipedia task
+  (see the report).
 
 ## Setup
 

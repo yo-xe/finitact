@@ -37,28 +37,28 @@
 <text class="tick" x="630.0" y="320" text-anchor="middle">1200k</text>
 <line class="axis" x1="210" y1="72" x2="210" y2="304"/>
 <text class="label" x="200" y="97" text-anchor="end">E2E-01 launch chat app, post</text>
-<path class="s1" d="M210.0,78.0 H219.5 Q223.5,78.0 223.5,82.0 V88.0 Q223.5,92.0 219.5,92.0 H210.0 Z"><title>Finitact, E2E-01 launch chat app, post: median 38.5k tokens, success 4/5</title></path>
-<text class="value" x="229.5" y="89">38.5k  (4/5)</text>
+<path class="s1" d="M210.0,78.0 H218.3 Q222.3,78.0 222.3,82.0 V88.0 Q222.3,92.0 218.3,92.0 H210.0 Z"><title>Finitact, E2E-01 launch chat app, post: median 35.2k tokens, success 5/5</title></path>
+<text class="value" x="228.3" y="89">35.2k</text>
 <path class="s2" d="M210.0,94.0 H223.8 Q227.8,94.0 227.8,98.0 V104.0 Q227.8,108.0 223.8,108.0 H210.0 Z"><title>windows-mcp, E2E-01 launch chat app, post: median 50.7k tokens, success 5/5</title></path>
 <text class="value" x="233.8" y="105">50.7k</text>
 <text class="label" x="200" y="141" text-anchor="end">E2E-02 AWS estimate to CSV</text>
-<path class="s1" d="M210.0,122.0 H364.6 Q368.6,122.0 368.6,126.0 V132.0 Q368.6,136.0 364.6,136.0 H210.0 Z"><title>Finitact, E2E-02 AWS estimate to CSV: median 453.1k tokens, success 5/5</title></path>
-<text class="value" x="374.6" y="133">453.1k</text>
-<path class="s2" d="M210.0,138.0 H600.5 Q604.5,138.0 604.5,142.0 V148.0 Q604.5,152.0 600.5,152.0 H210.0 Z"><title>windows-mcp, E2E-02 AWS estimate to CSV: median 1127.2k tokens, success 5/5</title></path>
-<text class="value" x="610.5" y="149">1127.2k</text>
+<path class="s1" d="M210.0,122.0 H398.8 Q402.8,122.0 402.8,126.0 V132.0 Q402.8,136.0 398.8,136.0 H210.0 Z"><title>Finitact, E2E-02 AWS estimate to CSV: median 550.9k tokens, success 5/5</title></path>
+<text class="value" x="408.8" y="133">550.9k</text>
+<path class="s2" d="M210.0,138.0 H582.4 Q586.4,138.0 586.4,142.0 V148.0 Q586.4,152.0 582.4,152.0 H210.0 Z"><title>windows-mcp, E2E-02 AWS estimate to CSV: median 1075.4k tokens, success 5/5</title></path>
+<text class="value" x="592.4" y="149">1075.4k</text>
 <text class="label" x="200" y="185" text-anchor="end">E2E-03 pick saved email</text>
-<path class="s1" d="M210.0,166.0 H217.5 Q221.5,166.0 221.5,170.0 V176.0 Q221.5,180.0 217.5,180.0 H210.0 Z"><title>Finitact, E2E-03 pick saved email: median 32.9k tokens, success 5/5</title></path>
-<text class="value" x="227.5" y="177">32.9k</text>
-<path class="s2" d="M210.0,182.0 H233.1 Q237.1,182.0 237.1,186.0 V192.0 Q237.1,196.0 233.1,196.0 H210.0 Z"><title>windows-mcp, E2E-03 pick saved email: median 77.3k tokens, success 5/5</title></path>
-<text class="value" x="243.1" y="193">77.3k</text>
+<path class="s1" d="M210.0,166.0 H218.9 Q222.9,166.0 222.9,170.0 V176.0 Q222.9,180.0 218.9,180.0 H210.0 Z"><title>Finitact, E2E-03 pick saved email: median 36.9k tokens, success 5/5</title></path>
+<text class="value" x="228.9" y="177">36.9k</text>
+<path class="s2" d="M210.0,182.0 H226.3 Q230.3,182.0 230.3,186.0 V192.0 Q230.3,196.0 226.3,196.0 H210.0 Z"><title>windows-mcp, E2E-03 pick saved email: median 57.9k tokens, success 5/5</title></path>
+<text class="value" x="236.3" y="193">57.9k</text>
 <text class="label" x="200" y="229" text-anchor="end">E2E-04 taskbar, search, scroll</text>
-<path class="s1" d="M210.0,210.0 H258.2 Q262.2,210.0 262.2,214.0 V220.0 Q262.2,224.0 258.2,224.0 H210.0 Z"><title>Finitact, E2E-04 taskbar, search, scroll: median 149.1k tokens, success 5/5</title></path>
-<text class="value" x="268.2" y="221">149.1k</text>
-<path class="s2" d="M210.0,226.0 H247.8 Q251.8,226.0 251.8,230.0 V236.0 Q251.8,240.0 247.8,240.0 H210.0 Z"><title>windows-mcp, E2E-04 taskbar, search, scroll: median 119.3k tokens, success 5/5</title></path>
-<text class="value" x="257.8" y="237">119.3k</text>
+<path class="s1" d="M210.0,210.0 H265.2 Q269.2,210.0 269.2,214.0 V220.0 Q269.2,224.0 265.2,224.0 H210.0 Z"><title>Finitact, E2E-04 taskbar, search, scroll: median 169.2k tokens, success 5/5</title></path>
+<text class="value" x="275.2" y="221">169.2k</text>
+<path class="s2" d="M210.0,226.0 H247.6 Q251.6,226.0 251.6,230.0 V236.0 Q251.6,240.0 247.6,240.0 H210.0 Z"><title>windows-mcp, E2E-04 taskbar, search, scroll: median 119.0k tokens, success 4/5</title></path>
+<text class="value" x="257.6" y="237">119.0k  (4/5)</text>
 <text class="label" x="200" y="273" text-anchor="end">E2E-05 new folder, drag files</text>
-<path class="s1" d="M210.0,254.0 H242.6 Q246.6,254.0 246.6,258.0 V264.0 Q246.6,268.0 242.6,268.0 H210.0 Z"><title>Finitact, E2E-05 new folder, drag files: median 104.5k tokens, success 5/5</title></path>
-<text class="value" x="252.6" y="265">104.5k</text>
-<path class="s2" d="M210.0,270.0 H323.0 Q327.0,270.0 327.0,274.0 V280.0 Q327.0,284.0 323.0,284.0 H210.0 Z"><title>windows-mcp, E2E-05 new folder, drag files: median 334.4k tokens, success 5/5</title></path>
-<text class="value" x="333.0" y="281">334.4k</text>
+<path class="s1" d="M210.0,254.0 H233.9 Q237.9,254.0 237.9,258.0 V264.0 Q237.9,268.0 233.9,268.0 H210.0 Z"><title>Finitact, E2E-05 new folder, drag files: median 79.8k tokens, success 5/5</title></path>
+<text class="value" x="243.9" y="265">79.8k</text>
+<path class="s2" d="M210.0,270.0 H279.0 Q283.0,270.0 283.0,274.0 V280.0 Q283.0,284.0 279.0,284.0 H210.0 Z"><title>windows-mcp, E2E-05 new folder, drag files: median 208.5k tokens, success 5/5</title></path>
+<text class="value" x="289.0" y="281">208.5k</text>
 </svg>

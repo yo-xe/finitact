@@ -177,6 +177,8 @@ def main() -> None:
                 halt = outer_agent.halt_reason(args.system, summary)
                 if limit := outer_agent.usage_limit(summary):
                     record.update(valid=False, excluded=limit)
+                elif unreachable := outer_agent.provider_unreachable(summary):
+                    record.update(valid=False, excluded=unreachable)
                 if args.outer == "codex" and not limit:
                     invalid = None
                     if summary.get("non_mcp_items"):

@@ -119,15 +119,15 @@ sequenceDiagram
 
 ## 結果
 
-2026-10-03計測。呼び出し元はClaude Code・`claude-sonnet-5-5`、Finitactは単一commit、promptは両系同一。AWS料金見積のFinitactのみ2026-10-04にブラウザ経路ONで取り直し。
+2026-10-04計測。呼び出し元はClaude Code・`claude-sonnet-5-5`、Finitactは単一commit、promptは両系同一。
 条件と限界は[docs/report/](docs/report/)(英語)。
 
 - 短いWindows作業9件(メモ帳、電卓、VS Code、Tk、Unity、Blender)を各10回: windows-mcpは全件10/10、Finitactは8件10/10・
-  1件9/10(Jevの接続失敗)。Finitactは9件中7件で速く、呼び出し元のエージェントのtokenは全9件で1/2.1〜1/7.8。
-- 多段作業5件を各5回: windows-mcpは全件5/5。Finitactは4件5/5、チャット投稿4/5。tokenは4件で少なく(1/1.3〜1/3.2)、
-  1件で多い(1.3倍)。
-- FinitactがJevへ払うtokenはこの数に含まない。Jev分も定価で合算した1試行の費用は全14件でFinitactが安い
-  (短い作業1/1.5〜1/6.4、多段1/1.2〜1/2.1。レポート参照)。
+  1件9/10(Blenderでmenuが開いたまま終了)。Finitactは9件中7件で速く、呼び出し元のエージェントのtokenは全9件で1/1.4〜1/6.5。
+- 多段作業5件を各5回: Finitactは全件5/5。windows-mcpは4件5/5、Wikipedia検索4/5(検索経路を示せず)。tokenは4件で
+  少なく(1/1.4〜1/2.6)、1件で多い(1.4倍)。
+- FinitactがJevへ払うtokenはこの数に含まない。Jev分も定価で合算した1試行の費用は14件中13件でFinitactが安く
+  (短い作業1/1.3〜1/6.3、多段1/1.4〜1/1.9)、Wikipedia検索では1.1倍高い(レポート参照)。
 
 ## 導入
 

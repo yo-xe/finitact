@@ -152,14 +152,35 @@ def test_reset_only_removes_contents_of_prechecked_profile(monkeypatch, tmp_path
 
 def test_public_export_rejects_final_state_only_e2e04(monkeypatch, tmp_path):
     monkeypatch.setattr(build_report_data, "ROOT", tmp_path)
-    monkeypatch.setattr(build_report_data, "C2_SETS", {("E2E-04", "windows-mcp"): "trial-set"})
+    monkeypatch.setattr(build_report_data, "C2_SETS", {("E2E-04", "windows-mcp"): ["trial-set"]})
     path = tmp_path / "docs/evaluations/e2e-live/results.jsonl"
     path.parent.mkdir(parents=True)
+    stream = tmp_path / "trial-set/e2e04-1.stream.jsonl"
+    stream.parent.mkdir()
+    stream.write_text("", encoding="utf-8")
     row = {
-        "scenario": "E2E-04", "tool": "windows-mcp", "stream": "artifacts/e2e-live/trial-set/e2e04-1.stream.jsonl",
+        "scenario": "E2E-04", "tool": "windows-mcp", "stream": str(stream),
         "oracle": {"final_state_success": True}, "success": True, "trial": 1,
         "seconds": 12.0, "outer_tokens": 1000, "model": "sonnet", "ui_tool_calls": 2,
     }
     path.write_text(json.dumps(row) + "\n", encoding="utf-8")
     with pytest.raises(ValueError, match="search route"):
         build_report_data.build_c2([])
+
+
+def test_public_export_keeps_unproven_route_failure(monkeypatch, tmp_path):
+    monkeypatch.setattr(build_report_data, "ROOT", tmp_path)
+    monkeypatch.setattr(build_report_data, "C2_SETS", {("E2E-04", "windows-mcp"): ["trial-set"]})
+    monkeypatch.setattr(build_report_data, "C2_TRIALS", 1)
+    path = tmp_path / "docs/evaluations/e2e-live/results.jsonl"
+    path.parent.mkdir(parents=True)
+    stream = tmp_path / "trial-set/e2e04-1.stream.jsonl"
+    stream.parent.mkdir()
+    stream.write_text("", encoding="utf-8")
+    row = {
+        "scenario": "E2E-04", "tool": "windows-mcp", "stream": str(stream),
+        "oracle": {"final_state_success": True, "route": {"status": "unknown"}}, "success": False, "trial": 1,
+        "seconds": 84.3, "outer_tokens": 1000, "outer_tokens_detail": {}, "model": "sonnet", "ui_tool_calls": 2,
+    }
+    path.write_text(json.dumps(row) + "\n", encoding="utf-8")
+    assert [r["verdict"] for r in build_report_data.build_c2([])] == ["failure"]
