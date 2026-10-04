@@ -20,7 +20,7 @@ from typing import Callable, Iterator, Mapping, Sequence
 import numpy as np
 
 from .action_adapter import MutationUncertain
-from .automation_indicator import AutomationIndicator
+from .automation_indicator import AutomationIndicator, indicator_from_env
 from .interaction_lease import (
     DeliveryRefused,
     ExclusiveInputEnvironment,
@@ -776,7 +776,7 @@ def _windows_synthetic_guard(request) -> tuple[SyntheticInputGuard, AutomationIn
     environment = ExclusiveInputEnvironment(str(request.exclusive_environment_ref), "runtime-scope-v1")
     try:
         initial_scope = current_windows_input_scope(environment)
-        indicator = AutomationIndicator()
+        indicator = indicator_from_env(os.environ)
         lease = WindowsSyntheticInputLease(
             mutex=WindowsNamedInteractionLease(initial_scope),
             idle_time=WindowsIdleTimePrecondition(

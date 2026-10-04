@@ -1,6 +1,10 @@
+import time
+from dataclasses import replace
+
 import pytest
 
-from finitact.automation_indicator import AutomationIndicator
+from finitact.automation_indicator import AutomationIndicator, indicator_from_env
+from finitact.indicator_theme import DEFAULT_THEME
 
 
 class FakeOverlay:
@@ -90,16 +94,20 @@ def test_delivering_requires_the_badge_to_already_be_shown():
             pass
 
 
-def test_delivering_brightens_then_restores_the_badge():
+def test_badge_animates_the_current_phase_until_closed():
     factory = FakeOverlayFactory()
     ind = indicator(overlay_factory=factory)
     ind.show()
     badge = factory.instances[0]
-    with ind.delivering():
-        assert badge.calls[-1][0] == "update"
-        delivering_image = badge.calls[-1][1]
-    idle_image = badge.calls[-1][1]
-    assert delivering_image.bgra_premultiplied != idle_image.bgra_premultiplied
+    ind.phase("think")
+    deadline = time.monotonic() + 2.0
+    while not any(call[0] == "update" for call in badge.calls) and time.monotonic() < deadline:
+        time.sleep(0.01)
+    ind.close()
+    updates = sum(call[0] == "update" for call in badge.calls)
+    assert updates > 0
+    time.sleep(0.15)
+    assert sum(call[0] == "update" for call in badge.calls) == updates
 
 
 def test_reticle_creates_one_overlay_and_reuses_it_across_deliveries():
@@ -135,3 +143,39 @@ def test_reticle_readiness_failure_propagates_and_never_yields():
     with pytest.raises(RuntimeError, match="failed to start"):
         with ind.reticle(hwnd=1, rect=(0, 0, 10, 10)):
             pytest.fail("delivery must not start")
+
+
+def test_indicator_from_env_rejects_an_unknown_corner():
+    with pytest.raises(ValueError, match="FINITACT_INDICATOR_CORNER"):
+        indicator_from_env({"FINITACT_INDICATOR_CORNER": "middle"})
+
+
+def test_indicator_from_env_rejects_a_negative_margin():
+    with pytest.raises(ValueError, match="FINITACT_INDICATOR_MARGIN"):
+        indicator_from_env({"FINITACT_INDICATOR_MARGIN": "-4"})
+
+
+def test_provider_activity_counts_overlapping_requests():
+    ind = indicator()
+    ind.provider_activity(True)
+    ind.provider_activity(True)
+    ind.provider_activity(False)
+    assert ind._provider_calls == 1
+    ind.provider_activity(False)
+    ind.provider_activity(False)
+    assert ind._provider_calls == 0
+
+
+def test_without_animation_the_badge_repaints_only_on_a_state_change():
+    factory = FakeOverlayFactory()
+    ind = indicator(overlay_factory=factory, theme=replace(DEFAULT_THEME, animated=False))
+    ind.show()
+    badge = factory.instances[0]
+    time.sleep(0.15)
+    assert [call[0] for call in badge.calls] == ["show"]
+    ind.phase("think")
+    ind.provider_activity(True)
+    time.sleep(0.15)
+    assert [call[0] for call in badge.calls] == ["show", "update", "update"]
+    assert badge.calls[1][1].bgra_premultiplied != badge.calls[2][1].bgra_premultiplied
+    ind.close()

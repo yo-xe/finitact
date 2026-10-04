@@ -316,7 +316,7 @@ def test_screen_grounded_factory_wires_three_layer_guard_for_native_windows(monk
     monkeypatch.setattr(module, "WindowsIdleTimePrecondition", lambda **kwargs: ("idle", kwargs))
     monkeypatch.setattr(module, "WindowsSyntheticInputLease", lambda **kwargs: ("three-layers", kwargs))
     fake_indicator = _FakeIndicator()
-    monkeypatch.setattr(module, "AutomationIndicator", lambda: fake_indicator)
+    monkeypatch.setattr(module, "indicator_from_env", lambda environ: fake_indicator)
 
     adapter = windows_screen_grounded_adapter_factory(
         _screen_request(synthetic_input_allowed=True, exclusive_environment_ref="audit:galleria")
@@ -347,7 +347,7 @@ def test_blocked_input_environment_is_rejected_by_a_later_separate_run(monkeypat
     monkeypatch.setattr(module, "WindowsNamedInteractionLease", lambda scope: None)
     monkeypatch.setattr(module, "WindowsIdleTimePrecondition", lambda **kwargs: None)
     monkeypatch.setattr(module, "WindowsSyntheticInputLease", lambda **kwargs: None)
-    monkeypatch.setattr(module, "AutomationIndicator", lambda: _FakeIndicator())
+    monkeypatch.setattr(module, "indicator_from_env", lambda environ: _FakeIndicator())
 
     request = _screen_request(synthetic_input_allowed=True, exclusive_environment_ref="blocked-across-runs:test")
     first_run_adapter = windows_screen_grounded_adapter_factory(request)

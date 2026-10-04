@@ -73,7 +73,13 @@ class DeliveryIndicator(Protocol):
 
     def close(self) -> None: ...
 
-    def reticle(self, *, hwnd: int, rect: Rect, action: str) -> AbstractContextManager: ...
+    def phase(self, name: str) -> None: ...
+
+    def provider_activity(self, active: bool) -> None: ...
+
+    def reticle(
+        self, *, hwnd: int, rect: Rect, action: str, heading: tuple[float, float] | None = None
+    ) -> AbstractContextManager: ...
 
 
 class _NoOpIndicator:
@@ -83,7 +89,15 @@ class _NoOpIndicator:
     def close(self) -> None:
         return None
 
-    def reticle(self, *, hwnd: int, rect: Rect, action: str) -> AbstractContextManager:
+    def phase(self, name: str) -> None:
+        return None
+
+    def provider_activity(self, active: bool) -> None:
+        return None
+
+    def reticle(
+        self, *, hwnd: int, rect: Rect, action: str, heading: tuple[float, float] | None = None
+    ) -> AbstractContextManager:
         return nullcontext()
 
 
@@ -280,6 +294,14 @@ class ScreenGroundedAdapter:
         return tuple(bounded)
 
     def observe(self) -> Observation:
+        self.indicator.phase("observe")
+        try:
+            return self._observe()
+        finally:
+            # Between observations the run is waiting on the decision provider.
+            self.indicator.phase("think")
+
+    def _observe(self) -> Observation:
         with self._timed("observe_capture"):
             frames = self._capture_frames()
             if self._pending_scroll is not None:
@@ -475,6 +497,15 @@ class ScreenGroundedAdapter:
     def act(
         self, candidate: ObservedCandidate, observation: Observation, text: str | None = None
     ) -> MutationResult:
+        self.indicator.phase(candidate.operation)
+        try:
+            return self._act(candidate, observation, text)
+        finally:
+            self.indicator.phase("think")
+
+    def _act(
+        self, candidate: ObservedCandidate, observation: Observation, text: str | None = None
+    ) -> MutationResult:
         operation = candidate.operation
         method = "synthetic_pointer" if operation in (*POINTER_OPERATIONS, "scroll", "drag") else "synthetic_key"
         if operation not in self.operations:
@@ -577,7 +608,7 @@ class ScreenGroundedAdapter:
                 return None
             # ADR-0010: reticle appears once the target is confirmed and stays up through send().
             reticle_stack.enter_context(
-                self.indicator.reticle(hwnd=original.hwnd, rect=rect, action=_reticle_action(operation))
+                self.indicator.reticle(hwnd=original.hwnd, rect=rect, action=operation)
             )
             return wanted
 
@@ -811,8 +842,9 @@ class ScreenGroundedAdapter:
             reticle_stack.enter_context(
                 self.indicator.reticle(
                     hwnd=start_hwnd,
-                    rect=start_rect if to_drop else _bounding_rect((start_rect, end_rect)),
-                    action="select",
+                    rect=start_rect,
+                    action="drag",
+                    heading=None if to_drop else _heading(start_rect, end_rect),
                 )
             )
             return wanted
@@ -880,7 +912,7 @@ class ScreenGroundedAdapter:
                 valid, focus = focus_target(**scope)
             # E2E-I7: frame where the key lands; the whole window was the full screen for a desktop target.
             rect = (_clipped(focus, root) if focus is not None else None) or (0, 0, root.width, root.height)
-            reticle_stack.enter_context(self.indicator.reticle(hwnd=root.hwnd, rect=rect, action="type"))
+            reticle_stack.enter_context(self.indicator.reticle(hwnd=root.hwnd, rect=rect, action="key"))
             return valid
 
         def send(_wanted, _method):
@@ -926,7 +958,7 @@ class ScreenGroundedAdapter:
             if not self._reads_same(observation, current):
                 return None
             sent_against[:] = [current]
-            reticle_stack.enter_context(self.indicator.reticle(hwnd=original.hwnd, rect=rect, action="select"))
+            reticle_stack.enter_context(self.indicator.reticle(hwnd=original.hwnd, rect=rect, action=f"scroll_{direction}"))
             return wanted
 
         def verify_delivery_target(_wanted, _method):
@@ -1661,10 +1693,6 @@ def _clipped(rect: Rect, frame: WindowFrame) -> Rect | None:
     return (left, top, right - left, bottom - top) if right > left and bottom > top else None
 
 
-def _reticle_action(operation: str) -> str:
-    return "click" if operation in POINTER_OPERATIONS else "type"
-
-
 def _equivalent_frames(before: Sequence[WindowFrame], after: Sequence[WindowFrame]) -> bool:
     """Same windows whose pixels are identical or differ only by one text caret.
 
@@ -1742,3 +1770,8 @@ def _same_scope(original: WindowFrame, current: WindowFrame) -> bool:
         current.width,
         current.height,
     )
+
+
+def _heading(start: Rect, end: Rect) -> tuple[float, float]:
+    (sx, sy), (ex, ey) = _center(start), _center(end)
+    return float(ex - sx), float(ey - sy)

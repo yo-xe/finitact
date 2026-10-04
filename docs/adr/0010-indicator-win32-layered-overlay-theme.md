@@ -65,6 +65,67 @@ Windows-MCP(`windows_mcp/desktop/flash_overlay.py`)も同じ理由でTkを捨て
 - 既定themeの依存としてPillowを実行時依存に加える(現状はdev groupのみ)。
 - BUG-0012は本ADRの実装とlive確認をもって閉じる。
 
+## 追記1(2026-10-04): バッジを状態で動くmascotにする
+
+- yo-xeの依頼(愛着が持てて軽量、状態に応じて変化)により、A(隅のバッジ)を18pxの静止点から44pxのmascotへ替えた。
+- 描画は既存と同じPillowの純粋関数(`render_mascot`)とWin32 layered windowで行う。CSS/SVG・Rive・Lottieは
+  WebView等の実行環境が要り、前面を取らない保証(本ADR)を崩しうるため採らない。1フレーム約0.5ms、20fps。
+- 状態はadapterが`phase()`で渡す: `observe`(観測中、視線が左右)、`think`(観測後〜次の操作、provider判断待ち。
+  頭上の3点が揺れる)、操作名(click=つぶれ、type=小刻み、scroll=視線上下、select=跳ね、drag=傾き)。
+  文字は使わない。点滅させず、動きは3Hz未満にする。
+- 位置は主画面の作業領域の右下にし、タスクバーと重ねない。送信ごとの明度変化(`delivering()`)は廃止し、reticleは維持する。
+- 見た目はyo-xeの採否待ち(試作。Windows実機で表示・状態変化を確認済み)。
+
+## 追記2(2026-10-04): mascotを藍色のオーブにする
+
+- yo-xeの指示で追記1の顔付きmascotを替えた: 目は無くし、境界のぼやけた明滅するオーブにする。生物的な動きは残す。
+- `render_orb`(numpy+Pillow、48px、1フレーム約0.25ms)。halo(ぼやけた縁)と丸いcoreを重ね、縁はsin和でゆっくり揺らぐ。
+  全状態で呼吸(0.28Hz)と明滅を続け、中心がわずかに漂う。
+- 色は藍色を基調にし、状態で縁の色味を変える: observe=青寄り、think=菫寄り、操作=明るい青。変化は0.5秒で補間する。
+- 状態ごとの動き: observe=内部の光点が巡回、think=波紋が外へ広がる、click/key=二拍の鼓動、type=縁が細かく震える、
+  scroll=光点が上下、select=浮き上がる、drag=横に伸びる。
+- 見た目はyo-xeの採否待ち(Windows実機で表示を確認済み)。
+
+## 追記3(2026-10-04): オーブを不定形・64pxにし、見た目を環境変数で変えられるようにする
+
+- yo-xeの指示で既定を64pxにし、中心の周りを漂う3つの葉(lobe)を合成して輪郭を不定形にした。1フレーム約0.26ms。
+- `FINITACT_INDICATOR_*`で外から変えられる: `SIZE`(32〜160px)・`CORNER`・`MARGIN`と、
+  色`COLOR_CORE`・`COLOR_IDLE`・`COLOR_OBSERVE`・`COLOR_THINK`・`COLOR_ACT`・`COLOR_RETICLE`(`#RRGGBB`)。
+  既存の他の`FINITACT_*`設定とともに`.env.example`へ既定値つきで列挙した。
+- 不正な値はrun開始時に変数名つきの`ValueError`で拒否する(`FINITACT_MIN_IDLE_SECONDS`と同じ扱い)。
+  入力を送る前に止まるので、誤設定で表示の無いまま操作することはない。
+
+## 追記4(2026-10-04): 外部providerを別の光点で示し、reticleをオーブと同じ表現にする
+
+- Jevは Finitact の外部である(Agent→Finitact→Jevの流れ)。yo-xeと検討した3案(衛星・流れの帯・色分け)から衛星案を採った。
+  - オーブの左上に琥珀色の小さな光点(provider)を置く。普段は暗く、要求の送信中だけ光る。
+    送信時はオーブから光点へ光が飛び、応答時は光点からオーブへ戻ってオーブが明るくなる。
+  - 検知は`model.post_json`(外部modelへの全HTTP呼び出しの入口)で行い、`provider_activity`のcontext変数で
+    そのrunのindicatorへだけ伝える。並列のheatにも届くよう、worker threadへcontextを複製する。
+    判断・達成判定・TYPE_TEXTのいずれも外部modelなので光る。Jevを使わないgoal(`ref`・`find_and_click`)では光らない。
+- reticle(入力対象の囲み)を四隅のL字から、対象の角の外を通る超楕円の柔らかい光の輪に替えた。ADR-0010の
+  「円や十字は使わない」を本追記で置き換える。内側は透明のまま対象の文字を隠さない。長辺のはみ出しは14pxまで。
+  色は既定でオーブの`act`色に従う。操作ごとの動き(click=鼓動、type=光が左→右、select=膨らむ、wait=明滅)は維持する。
+- 既定の大きさを96px(範囲48〜192)にした。`FINITACT_INDICATOR_ANIMATION=0`で動きを止め、状態が変わった時だけ
+  静止画を描き替える。表示そのものは安全層(ADR-0009層3)なので消せない。`FINITACT_INDICATOR_COLOR_PROVIDER`を追加した。
+- Windows実機で一連の流れ(観測→provider往復→操作とreticle)を表示して確認した。見た目はyo-xeの採否待ち。
+
+## 追記5(2026-10-04): reticleも小さなオーブにする
+
+- yo-xeの指示で、追記4の光の輪をやめ、対象の中心付近に浮かぶ小さな半透明のオーブにした。位置はおおよそでよい。
+- 描画はコーナーのオーブと共通(`render_orb(solo=True)`、光点なし)。大きさは対象の短辺から決め、44〜96px。
+  不透明度0.75で対象の文字は透けて読める。色と操作ごとの動きはコーナーのオーブと同じ文法に従う。
+- Windows実機で一連の流れを表示して確認した。見た目はyo-xeの採否待ち。
+
+## 追記6(2026-10-04): 操作ごとに動きを分ける
+
+- reticleとコーナーのオーブは、実際の操作名で動く(以前はclick系7種がclick、key・fillがtype、scrollがselectに丸まっていた)。
+- click=一拍の鼓動、double_click=二拍、right_click=鼓動のあと右下へ小さくはみ出す、middle_click=鼓動と上下の伸び、
+  ctrl_click/shift_click=鼓動と寄り添う粒(ctrlは時計回り、shiftは逆回り)、hover=鼓動せず漂う、fill=縁が震える、
+  key=縮んで一度光る、scroll=光点がスクロール方向へ流れる、drag=終点の方向へ尾を引いて伸びる(別窓への
+  dropでは向きを付けない)、set_range=横に伸び縮みする。色は増やさず、動きだけで区別する(yo-xe了承の割り当て)。
+- dragのreticleは始点の上に出す(以前は始点と終点を囲む矩形)。Windows実機で全13操作を表示して確認した。
+
 <!-- 現況 -->
 2026-09-23: 採択・実装・galleria実機でのlive確認まで完了。badge/reticle/delivering中も
 GetForegroundWindow()は対象windowのまま(BUG-0012解消、`--fixed`でクローズ済み)。

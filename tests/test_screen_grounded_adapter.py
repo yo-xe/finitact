@@ -805,6 +805,9 @@ def test_key_reticle_frames_the_focused_element_not_the_whole_window():
         def close(self):
             pass
 
+        def phase(self, name):
+            pass
+
         @contextmanager
         def reticle(self, *, hwnd, rect, action):
             Indicator.rects.append((rect, action))
@@ -819,7 +822,7 @@ def test_key_reticle_frames_the_focused_element_not_the_whole_window():
     subject.indicator = Indicator()
     observation = subject.observe()
     assert subject.act(observation.candidates[0], observation).status == "confirmed"
-    assert Indicator.rects == [((1, 0, 3, 3), "type")]
+    assert Indicator.rects == [((1, 0, 3, 3), "key")]
 
 
 def uia_adapter(*frames, reads, pointer=None, operations=("click", "fill")):

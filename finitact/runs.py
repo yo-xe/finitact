@@ -18,6 +18,7 @@ from urllib.parse import urlsplit
 
 from .action_adapter import ActionAdapter, ActionOutcome, Freshness, MutationUncertain, Observation, ScopeViolation
 from .achievement import launch_pending
+from .provider_activity import listening
 from .agent import Agent
 from .contracts import (
     EDGE_CONTOUR_SOURCE,
@@ -976,15 +977,18 @@ class WindowsRunCoordinator:
             run_start = observation
             # ADR-0037: the browser keeps history and provider attempts across goals (Agent.continue_with).
             run_scope = ([], []) if getattr(adapter, "budget_scope", "goal") == "run" else None
-            for goal in request.goals:
-                result, observation = self._execute_goal(
-                    request, goal, adapter, observation, started, timer, picked, run_scope, run_start
-                )
-                picked = None
-                timer = _StageTimer(adapter)
-                results.append(result)
-                if result.termination_reason not in {"provider_done", "outcome_verified"}:
-                    break
+            # ADR-0010 追記4: the indicator lights its provider spark while a model request is in flight.
+            indicator = getattr(adapter, "indicator", None)
+            with listening(getattr(indicator, "provider_activity", None)):
+                for goal in request.goals:
+                    result, observation = self._execute_goal(
+                        request, goal, adapter, observation, started, timer, picked, run_scope, run_start
+                    )
+                    picked = None
+                    timer = _StageTimer(adapter)
+                    results.append(result)
+                    if result.termination_reason not in {"provider_done", "outcome_verified"}:
+                        break
         except _RefusedBeforeActing as exc:
             goal = request.goals[0]
             results.append(self._goal_result(request, goal, "blocked", "none", "unverified", str(exc)))

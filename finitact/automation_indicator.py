@@ -18,22 +18,26 @@ import ctypes
 import os
 import threading
 import time
+from collections.abc import Mapping
 from contextlib import contextmanager
 from typing import Callable, Iterator
 
 from .indicator_theme import (
     DEFAULT_THEME,
+    INDICATOR_ENV_PREFIX,
+    ORB_FPS,
+    STILL_SECONDS,
+    ProviderState,
     Rect,
+    RenderedImage,
     Theme,
     corner_position,
-    render_badge,
+    render_orb,
     render_reticle,
     reticle_origin,
-    settle_seconds,
+    theme_from_env,
 )
 from .win32_overlay import Win32LayeredOverlay
-
-_ANIMATION_FPS = 30
 
 
 class AutomationIndicator:
@@ -61,19 +65,67 @@ class AutomationIndicator:
         self._window_origin = window_origin or _window_screen_origin
         self._badge: Win32LayeredOverlay | None = None
         self._reticle_overlay: Win32LayeredOverlay | None = None
+        self._phase = ("idle", time.monotonic())
+        # Heats ask the provider concurrently, so in-flight requests are counted, not flagged.
+        self._provider_lock = threading.Lock()
+        self._provider_calls = 0
+        self._provider_changed = time.monotonic() - 1e6
+        self._badge_stop = threading.Event()
+        self._badge_thread: threading.Thread | None = None
 
     def show(self) -> None:
         if self._badge is not None:
             raise RuntimeError("indicator is already showing")
         badge = self._overlay_factory(class_name="FinitactIndicatorBadge")
         badge.start()
-        width, height = self._theme.badge_size
+        width = height = self._theme.orb_size
         screen_width, screen_height = self._screen_size()
         x, y = corner_position(self._corner, screen_width, screen_height, width, height, self._margin)
-        badge.show(x=x, y=y, image=render_badge(self._theme, delivering=False))
+        badge.show(x=x, y=y, image=self._badge_frame())
         self._badge = badge
+        if self._theme.animated:
+            self._badge_stop.clear()
+            self._badge_thread = threading.Thread(target=self._animate_badge, args=(badge,), daemon=True)
+            self._badge_thread.start()
+
+    def phase(self, name: str) -> None:
+        """Switch the orb's motion: observe, think, or the operation being delivered."""
+
+        self._phase = (name, time.monotonic())
+        self._repaint_still()
+
+    def provider_activity(self, active: bool) -> None:
+        """One provider request started (True) or ended (False); the spark is lit while any is in flight."""
+
+        with self._provider_lock:
+            was_active = self._provider_calls > 0
+            self._provider_calls = max(0, self._provider_calls + (1 if active else -1))
+            if (self._provider_calls > 0) != was_active:
+                self._provider_changed = time.monotonic()
+        self._repaint_still()
+
+    def _badge_frame(self, now: float | None = None) -> RenderedImage:
+        name, started = self._phase
+        if not self._theme.animated:
+            return render_orb(self._theme, name, STILL_SECONDS, ProviderState(self._provider_calls > 0, STILL_SECONDS))
+        now = time.monotonic() if now is None else now
+        provider = ProviderState(self._provider_calls > 0, now - self._provider_changed)
+        return render_orb(self._theme, name, now - started, provider)
+
+    def _repaint_still(self) -> None:
+        badge = self._badge
+        if badge is not None and not self._theme.animated:
+            badge.update(image=self._badge_frame())
+
+    def _animate_badge(self, badge: Win32LayeredOverlay) -> None:
+        while not self._badge_stop.wait(1.0 / ORB_FPS):
+            badge.update(image=self._badge_frame())
 
     def close(self) -> None:
+        self._badge_stop.set()
+        if self._badge_thread is not None:
+            self._badge_thread.join(timeout=1.0)
+            self._badge_thread = None
         if self._badge is not None:
             self._badge.close()
             self._badge = None
@@ -85,14 +137,12 @@ class AutomationIndicator:
     def delivering(self) -> Iterator[None]:
         if self._badge is None:
             raise RuntimeError("indicator must be shown before a delivery")
-        self._badge.update(image=render_badge(self._theme, delivering=True))
-        try:
-            yield
-        finally:
-            self._badge.update(image=render_badge(self._theme, delivering=False))
+        yield
 
     @contextmanager
-    def reticle(self, *, hwnd: int, rect: Rect, action: str = "click") -> Iterator[None]:
+    def reticle(
+        self, *, hwnd: int, rect: Rect, action: str = "click", heading: tuple[float, float] | None = None
+    ) -> Iterator[None]:
         overlay = self._reticle_overlay
         if overlay is None:
             overlay = self._overlay_factory(class_name="FinitactIndicatorReticle")
@@ -105,20 +155,22 @@ class AutomationIndicator:
 
         # Shown synchronously, before ``yield``: ADR-0010 requires the reticle to be visible
         # before delivery proceeds, not merely "eventually" once a background thread schedules it.
-        overlay.show(x=x, y=y, image=render_reticle(self._theme, rect, action=action, progress=0.0))
+        first = STILL_SECONDS if not self._theme.animated else 0.0
+        overlay.show(x=x, y=y, image=render_reticle(self._theme, rect, action=action, t=first, heading=heading))
+        if not self._theme.animated:
+            try:
+                yield
+            finally:
+                overlay.hide()
+            return
 
         stop = threading.Event()
 
         def animate() -> None:
             start = time.monotonic()
-            duration = settle_seconds(self._theme)
-            loop = action == "wait"
-            while not stop.wait(1.0 / _ANIMATION_FPS):
+            while not stop.wait(1.0 / ORB_FPS):
                 elapsed = time.monotonic() - start
-                progress = elapsed / duration if duration > 0 else 1.0
-                overlay.update(image=render_reticle(self._theme, rect, action=action, progress=progress))
-                if not loop and progress >= 1.0:
-                    return
+                overlay.update(image=render_reticle(self._theme, rect, action=action, t=elapsed, heading=heading))
 
         thread = threading.Thread(target=animate, daemon=True)
         thread.start()
@@ -137,8 +189,31 @@ class AutomationIndicator:
         self.close()
 
 
+CORNERS = ("bottom_right", "bottom_left", "top_right", "top_left")
+
+
+def indicator_from_env(environ: Mapping[str, str]) -> AutomationIndicator:
+    """The indicator with the ``FINITACT_INDICATOR_*`` look and placement; a malformed value raises."""
+
+    corner = environ.get(INDICATOR_ENV_PREFIX + "CORNER", "").strip() or "bottom_right"
+    if corner not in CORNERS:
+        raise ValueError(f"{INDICATOR_ENV_PREFIX}CORNER must be one of {', '.join(CORNERS)}, got {corner!r}")
+    margin = environ.get(INDICATOR_ENV_PREFIX + "MARGIN", "").strip() or "24"
+    if not margin.isdigit():
+        raise ValueError(f"{INDICATOR_ENV_PREFIX}MARGIN must be a non-negative integer of px, got {margin!r}")
+    return AutomationIndicator(theme=theme_from_env(environ), corner=corner, margin=int(margin))
+
+
 def _primary_screen_size() -> tuple[int, int]:
+    """Right and bottom of the primary work area, so the badge never sits on the taskbar clock."""
+
+    from ctypes import wintypes
+
     user32 = ctypes.WinDLL("user32", use_last_error=True)
+    SPI_GETWORKAREA = 0x0030
+    area = wintypes.RECT()
+    if user32.SystemParametersInfoW(SPI_GETWORKAREA, 0, ctypes.byref(area), 0):
+        return area.right, area.bottom
     SM_CXSCREEN, SM_CYSCREEN = 0, 1
     return user32.GetSystemMetrics(SM_CXSCREEN), user32.GetSystemMetrics(SM_CYSCREEN)
 

@@ -243,6 +243,9 @@ same input returns the cached result without repeating input.
 
 - Mouse and keyboard input starts only after one second without user input and while an on-screen indicator is visible. Each run is
   bounded by a deadline, an action budget and a budget of decision-model calls. Ending the server process stops a run.
+- The indicator is a glowing orb in a screen corner. A small amber spark beside it lights while Finitact waits on the
+  decision model, and a smaller orb marks roughly where each input lands. Size, place, colors and motion can be set
+  with `FINITACT_INDICATOR_*` in `.env` (see `.env.example`). The indicator itself cannot be turned off.
 - Input is never resent automatically. If it is unclear whether input arrived, the server refuses further input
   until it restarts.
 - Screen `fill` replaces the clipboard and does not restore it.

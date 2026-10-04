@@ -1,5 +1,6 @@
 """TypeSafe makes choices; an optional small OpenAI-compatible model writes field values."""
 
+import contextvars
 import hashlib
 import json
 import math
@@ -10,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import httpx
 
+from .provider_activity import provider_call
 from .questions import FINAL_ACTION, HEAT_ACTION, NEXT_ACTION, TARGET, TEXT_VALUE
 
 CLIENT = httpx.Client(http2=True, timeout=25)
@@ -32,6 +34,11 @@ TYPESAFE_MAX_CHOICES = 255
 
 
 def post_json(url, key, body, *, audit=None, call_id=None, provider="model", attempt_limit=None):
+    with provider_call():
+        return _post_json(url, key, body, audit=audit, call_id=call_id, provider=provider, attempt_limit=attempt_limit)
+
+
+def _post_json(url, key, body, *, audit=None, call_id=None, provider="model", attempt_limit=None):
     request_hash = hashlib.sha256(
         json.dumps(body, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
@@ -381,7 +388,9 @@ def choose_observed_candidates(request, *, attempts=None, call_id=None, attempt_
 
         # Heats are independent, so they run concurrently; only the final can lead to an action.
         with ThreadPoolExecutor(max_workers=len(chunks)) as pool:
-            answered = list(pool.map(heat, chunks))
+            # Each worker runs in a copy of this thread's context, so the run's provider listener still sees it.
+            contexts = [contextvars.copy_context() for _ in chunks]
+            answered = list(pool.map(lambda context, chunk: context.run(heat, chunk), contexts, chunks))
         for chunk, (_, result, answer, latency) in zip(chunks, answered):
             heats.append({
                 "candidates": len(chunk),
