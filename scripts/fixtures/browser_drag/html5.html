@@ -1,0 +1,12 @@
+<!doctype html><meta charset=utf-8><title>html5</title>
+<style>body{font:16px sans-serif}.card{width:120px;height:40px;background:#cde;margin:8px;padding:6px}
+#done{width:300px;height:160px;border:2px dashed #888;margin:20px;padding:6px}</style>
+<div class=card draggable=true id=a>Card A</div><div class=card draggable=true id=b>Card B</div>
+<div id=done class=dropzone>Done</div><pre id=log>none</pre>
+<script>
+const L=[];const log=s=>{L.push(s);document.getElementById('log').textContent=L.join(',')};
+for(const c of document.querySelectorAll('.card'))c.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',c.id);log('dragstart:'+c.id)});
+const d=document.getElementById('done');
+d.addEventListener('dragover',e=>e.preventDefault());
+d.addEventListener('drop',e=>{e.preventDefault();const id=e.dataTransfer.getData('text/plain');log('drop:'+id);d.appendChild(document.getElementById(id))});
+</script>

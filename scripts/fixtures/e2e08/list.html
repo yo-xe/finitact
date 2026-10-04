@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Item list</title></head>
+<body>
+<h1>Item list</h1>
+<ul id="items"></ul>
+<p><a href="edit.html">Edit items</a></p>
+<script>
+fetch("/api/visit?page=list", {method: "POST"});
+fetch("/api/items").then(r => r.json()).then(d => {
+  for (const name of d.saved) document.getElementById("items").insertAdjacentHTML("beforeend", `<li>${name}</li>`);
+});
+</script>
+</body>
+</html>

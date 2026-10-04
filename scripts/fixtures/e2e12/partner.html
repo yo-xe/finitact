@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Partner panel</title></head>
+<body>
+<p>Partner panel <button id="approve">Approve order</button> <span id="status"></span></p>
+<script>
+document.getElementById("approve").onclick = () => {
+  fetch("/api/event", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({type: "xorigin_button", origin: location.origin})});
+  document.getElementById("status").textContent = "Approved.";
+};
+</script>
+</body>
+</html>

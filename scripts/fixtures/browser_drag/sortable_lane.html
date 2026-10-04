@@ -1,0 +1,5 @@
+<!doctype html><meta charset=utf-8><style>body{font:16px sans-serif}.list{width:220px;min-height:150px;border:1px solid #888;margin:10px;padding:6px;float:left}.item{cursor:grab;background:#cde;margin:6px 0;padding:8px}</style><title>sortable-lane</title><script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<div id=left class=list><div class=item id=a>Card A</div><div class=item id=b>Card B</div></div>
+<div id=right class="list lane"><div class=item id=c>Card C</div></div>
+<script>for(const id of ['left','right'])Sortable.create(document.getElementById(id),{group:'g',animation:0});
+window.state=()=>JSON.stringify({left:[...left.children].map(e=>e.id),right:[...right.children].map(e=>e.id)})</script>

@@ -1,0 +1,421 @@
+{
+  "schema_version": 1,
+  "status": "preregistered",
+  "live_execution_status": "partially_run",
+  "live_execution_notes": "fail_closed group (5/5) and screen_single_action (1/1, mechanism-proven-live only, see its own live_result.target_binding_rule_deviation) have live_result entries as of 2026-09-23. uia_single_action (uia-notepad-fill-001) and screen_two_action (screen-unity-select-resolution-001) remain not_run. Non-manifest Phase F probes passed live on 2026-09-23: LeaseAbandoned, same-run_id replay, and the screen two-action mechanism on a disposable Tk target (see screen-unity-select-resolution-001.mechanism_probe and phase-f-native-mcp.md).",
+  "rules": {
+    "target_binding": "Resolve the target to screen:<HWND>:<PID> or uia:<HWND>:<PID> immediately before each run; never reuse a saved HWND or PID. Attaching to an already-running evaluation target (e.g. the sample-unity-project Unity project) is allowed once its registered initial_state is confirmed before the run.",
+    "target_binding_revision": {
+      "date": "2026-09-23",
+      "adr": "ADR-0015",
+      "change": "Dropped the requirement that each run use a newly created disposable target."
+    },
+    "aggregation": "Report UIA single-action, screen single-action, screen two-action, and fail-closed cases separately.",
+    "evidence_boundary": "Fixture results do not establish live success. Delivery certainty and independent outcome are separate fields.",
+    "retry": "Never retry uncertain delivery automatically or under a new run_id."
+  },
+  "cases": [
+    {
+      "id": "uia-notepad-fill-001",
+      "group": "uia_single_action",
+      "initial_state": "A newly launched disposable Notepad process contains an empty document; pre-existing Notepad processes and tabs are excluded.",
+      "goal": "Fill the disposable document with the exact fixture string FINITACT-UIA-001.",
+      "candidate_set": "Complete UIA observation scoped to the disposable Notepad root and its same-PID owned windows.",
+      "allowed_operations": [
+        "fill"
+      ],
+      "success_predicate": "The native edit control text equals FINITACT-UIA-001 exactly.",
+      "independent_oracle": "WM_GETTEXT through the edit HWND, not UIA re-observation.",
+      "deadline_ms": 15000,
+      "action_budget": 1,
+      "provider_attempt_budget": 3,
+      "stop_conditions": [
+        "scope_change",
+        "mutation_uncertain",
+        "incomplete_observation"
+      ],
+      "expected_send_input_events": 0
+    },
+    {
+      "id": "uia-calculator-digit-001",
+      "group": "uia_single_action",
+      "initial_state": "A newly launched Calculator (Standard) window whose display reads 0.",
+      "goal": "Press the 7 key on the calculator.",
+      "candidate_set": "Complete UIA observation scoped to the Calculator ApplicationFrameWindow (uia:<frame HWND>:<ApplicationFrameHost PID>).",
+      "allowed_operations": [
+        "click"
+      ],
+      "success_predicate": "The calculator display reads 7.",
+      "independent_oracle": "PrintWindow capture of the frame + PP-OCR; the tallest recognized line, normalized.",
+      "deadline_ms": 15000,
+      "action_budget": 1,
+      "provider_attempt_budget": 3,
+      "stop_conditions": [
+        "scope_change",
+        "mutation_uncertain",
+        "incomplete_observation"
+      ],
+      "expected_send_input_events": 0,
+      "oracle_live_status": "not_passed: a scripted click on the OCR '7' region left the display reading '+/-' (2026-09-24, unresolved)"
+    },
+    {
+      "id": "screen-blender-workspace-001",
+      "group": "screen_single_action",
+      "initial_state": "A newly launched Blender 5.2 (--factory-startup with scripts/blender_state_writer.py) on the Layout workspace.",
+      "goal": "Switch to the Shading workspace.",
+      "candidate_set": "Finite Stage1 regions from a fresh capture of the Blender window.",
+      "allowed_operations": [
+        "click"
+      ],
+      "success_predicate": "The window's workspace is Shading.",
+      "independent_oracle": "bpy state file (pid-bound, fresh within 2 s): workspaces[0].",
+      "deadline_ms": 20000,
+      "action_budget": 1,
+      "provider_attempt_budget": 3,
+      "stop_conditions": [
+        "scope_change",
+        "freshness_failure",
+        "lease_failure",
+        "mutation_uncertain",
+        "incomplete_observation"
+      ],
+      "expected_send_input_events": 2,
+      "oracle_live_status": "passed with a scripted drive (scripts/check_phase_i_oracles_live.py blender, 2026-09-24)"
+    },
+    {
+      "id": "screen-blender-select-mode-001",
+      "group": "screen_two_action",
+      "initial_state": "A newly launched Blender 5.2 as above, default cube active in Object Mode, mode menu closed.",
+      "goal": "Open the interaction mode dropdown and select Edit Mode.",
+      "candidate_set": "Action 1 and action 2 each use finite Stage1 regions from a fresh capture of the Blender window (the menu is drawn inside it, no owned popup).",
+      "allowed_operations": [
+        "click"
+      ],
+      "success_predicate": "The mode menu is observed open, then closed, and the active object mode is EDIT.",
+      "independent_oracle": "Menu open = at least 3 of Edit Mode/Sculpt Mode/Vertex Paint/Weight Paint recognized by PP-OCR in one polled capture (bpy exposes no menu state); mode from the bpy state file.",
+      "deadline_ms": 45000,
+      "action_budget": 2,
+      "provider_attempt_budget": 6,
+      "stop_conditions": [
+        "scope_change",
+        "freshness_failure",
+        "lease_failure",
+        "mutation_uncertain",
+        "incomplete_observation",
+        "idle_precondition_denied_at_run_start",
+        "run_deadline_before_later_delivery"
+      ],
+      "expected_send_input_events": 4,
+      "oracle_live_status": "passed with a scripted drive holding the menu open 3 s; OCR polling gap about 1.3-3.8 s, so a menu open for less than that is undetermined, not success"
+    },
+    {
+      "id": "screen-unity-open-dropdown-001",
+      "group": "screen_single_action",
+      "initial_state": "A disposable Unity project is open in Game View with the resolution dropdown closed and no UnityPopupWndClass owned popup present.",
+      "goal": "Open the Game View resolution dropdown.",
+      "candidate_set": "Finite Stage1 regions from a fresh target-window capture; the resolution control must be uniquely reidentified by region id, label, rect, evidence, and anchor fingerprint.",
+      "allowed_operations": [
+        "click"
+      ],
+      "success_predicate": "At least one new visible same-PID UnityPopupWndClass owned window appears relative to the pre-run baseline.",
+      "independent_oracle": "Win32 EnumWindows owned-window diff.",
+      "deadline_ms": 20000,
+      "action_budget": 1,
+      "provider_attempt_budget": 3,
+      "stop_conditions": [
+        "scope_change",
+        "freshness_failure",
+        "lease_failure",
+        "mutation_uncertain",
+        "incomplete_observation"
+      ],
+      "expected_send_input_events": 2,
+      "live_result": {
+        "status": "mechanism_proven_live",
+        "date": "2026-09-23",
+        "summary": "scripts/check_windows_mcp_unity_dropdown_live.py attached to an already-running Unity Editor (sample-unity-project SampleLab, HWND 920288 / PID 35520) and opened the Game View resolution dropdown via run_windows(screen:...). passed=true: UnityPopupWndClass appeared per the independent oracle, then the dropdown was closed (Escape) without changing the resolution. Re-run a second time after installing tesseract on galleria, with OCR no longer disabled, exercising the real unmodified CompositeRegionExtractor (tesseract + edge) production stack end to end: passed=true again.",
+        "target_binding_rule_deviation": "This manifest's target_binding rule requires a newly created disposable target resolved immediately before each run; this run instead attached to a long-running real project. It proves the success_predicate/independent_oracle mechanism against genuine Unity content, but a fully rule-compliant Phase I comparison run still needs a freshly spun-up disposable Unity project.",
+        "evidence": "docs/evaluations/windows-mcp-replacement/phase-f-native-mcp.md"
+      }
+    },
+    {
+      "id": "screen-unity-select-resolution-001",
+      "group": "screen_two_action",
+      "initial_state": "The running sample-unity-project Unity Editor (attached per ADR-0015 decision 5) shows Game View with the resolution dropdown closed and a current value other than Full HD (1920x1080); reset it before each run.",
+      "goal": "Open the Game View resolution dropdown and select Full HD (1920x1080).",
+      "candidate_set": "Action 1 uses finite Stage1 regions from the target window. Action 2 uses finite Stage1 regions from a fresh capture of the newly appeared owned popup; both actions require exact candidate reidentification.",
+      "allowed_operations": [
+        "click"
+      ],
+      "success_predicate": "The owned popup disappears and a separately captured target-specific display reads Full HD (1920x1080) exactly.",
+      "independent_oracle": "Win32 owned-window diff plus target-specific captured-value recognition; image difference alone is insufficient.",
+      "deadline_ms": 45000,
+      "action_budget": 2,
+      "provider_attempt_budget": 6,
+      "stop_conditions": [
+        "scope_change",
+        "freshness_failure",
+        "lease_failure",
+        "mutation_uncertain",
+        "incomplete_observation",
+        "idle_precondition_denied_at_run_start",
+        "run_deadline_before_later_delivery",
+        "candidate_window_vanished"
+      ],
+      "expected_send_input_events": 4,
+      "stop_condition_revision": {
+        "date": "2026-09-23",
+        "adr": "ADR-0012",
+        "change": "Replaced second_action_idle_recheck_denied (per-delivery idle gate) with idle_precondition_denied_at_run_start (idle checked once after the run acquires the mutex, held through both actions), run_deadline_before_later_delivery, and candidate_window_vanished. scope_change now means the root window identity changed; a newly appeared owned popup between actions is an allowed transition. success_predicate and independent_oracle are unchanged. No live result exists under the old conditions."
+      },
+      "mechanism_probe": {
+        "status": "mechanism_proven_live",
+        "date": "2026-09-23",
+        "summary": "scripts/check_windows_mcp_two_action_live.py on a disposable Tk root + transient tool-window popup, not Unity: one run_windows call, action_budget=2, mutex once, idle read once (68.6s), 4 SendInput events, second click delivered to the owned popup HWND with foreground_hwnds=(root, popup), outcome verified_success by the server verifier and the launcher's own EnumWindows (root title SELECTED:FULL HD, popup gone). Wall 5.2s.",
+        "fixture_note": "Tk overrideredirect(True) drops the transient owner (the popup becomes desktop-parented and unowned), which ADR-0012 scope correctly excludes; the first attempt stopped provider_blocked with 0 popup candidates. The probe uses -toolwindow so the owner chain reaches the root.",
+        "not_a_substitute_for": "This preregistered Unity case, which still needs a disposable Unity project."
+      },
+      "initial_state_revision": {
+        "date": "2026-09-24",
+        "adr": "ADR-0015",
+        "change": "Disposable Unity project replaced by attaching to sample-unity-project; the value read right of 'Display 1' (PP-OCR, normalized; Windows OCR glues the dropdown arrow to it) must differ from Full HD before the run, so the scripted check resets it to 16:9 Aspect first."
+      }
+    },
+    {
+      "id": "screen-vscode-fill-save-001",
+      "group": "screen_two_action",
+      "added": {
+        "date": "2026-09-24",
+        "plan": "docs/plans/screen-input-ops.md step 4"
+      },
+      "initial_state": "A newly launched disposable VSCode (isolated --user-data-dir and --extensions-dir, settings from scripts/check_windows_mcp_screen_vscode_fill_live.py) with one file whose content is OLDVALUE, in the foreground.",
+      "goal": "Replace the whole document text with `value = \"Finitact 日本語\"` and save the file.",
+      "goal_id": "vscode-fill-save",
+      "fill_value": "value = \"Finitact 日本語\"",
+      "candidate_set": "Action 1 fill candidates from finite Stage1 regions of a fresh capture of the VSCode window; action 2 from the fixed key allowlist.",
+      "allowed_operations": [
+        "fill",
+        "key"
+      ],
+      "success_predicate": "The file on disk reads value = \"Finitact 日本語\" exactly (CRLF and a final newline normalized).",
+      "independent_oracle": "The saved file read from disk by the evaluating process, not the screen.",
+      "deadline_ms": 45000,
+      "action_budget": 2,
+      "provider_attempt_budget": 6,
+      "stop_conditions": [
+        "scope_change",
+        "freshness_failure",
+        "lease_failure",
+        "mutation_uncertain",
+        "incomplete_observation",
+        "idle_precondition_denied_at_run_start",
+        "run_deadline_before_later_delivery"
+      ],
+      "expected_send_input_events": 4
+    },
+    {
+      "id": "screen-tk-scroll-select-001",
+      "group": "screen_two_action",
+      "added": {
+        "date": "2026-09-25",
+        "plan": "docs/plans/screen-input-ops.md step 4"
+      },
+      "initial_state": "A newly launched disposable framed Tk window (scripts/check_windows_mcp_screen_scroll_live.py --case find --no-popup --decorated) holding one Listbox of 60 rows with 12 visible, scrolled to the top, nothing selected, in the foreground. Row 45 reads TARGET ROW.",
+      "goal": "Scroll the list until 'TARGET ROW' is visible and select it.",
+      "goal_id": "scroll-select-target-row",
+      "click_label_constraint": "TARGET ROW",
+      "selection_policy": "find_and_click",
+      "candidate_set": "Scroll up/down candidates per list-like region stack and click candidates from finite Stage1 regions of a fresh capture after every action.",
+      "allowed_operations": [
+        "click",
+        "scroll"
+      ],
+      "success_predicate": "The Listbox selection reads TARGET ROW.",
+      "independent_oracle": "The state file the Tk process writes every 100 ms (its PID, yview and curselection), not the screen.",
+      "deadline_ms": 90000,
+      "action_budget": 10,
+      "provider_attempt_budget": 12,
+      "stop_conditions": [
+        "scope_change",
+        "freshness_failure",
+        "lease_failure",
+        "mutation_uncertain",
+        "incomplete_observation",
+        "idle_precondition_denied_at_run_start",
+        "run_deadline_before_later_delivery"
+      ],
+      "expected_send_input_events": "one per wheel notch, then 2 for the click",
+      "fixture_note": "A borderless (overrideredirect) window is absent from windows-mcp's window list, so App switch fell back to another window and both first windows-mcp trials ended BLOCKED without touching the list; the case therefore uses a framed window for both systems."
+    },
+    {
+      "id": "screen-tk-drag-drop-001",
+      "group": "screen_two_action",
+      "added": {
+        "date": "2026-09-25",
+        "plan": "docs/plans/screen-input-ops.md step 4"
+      },
+      "initial_state": "A newly launched disposable framed Tk window (scripts/check_windows_mcp_screen_drag_live.py --target --no-popup --decorated) showing SOURCE CARD, DECOY ZONE and DROP ZONE labels, nothing dropped, in the foreground. The window implements its own DnD: a drag starts only after button 1 moved more than 6 px, and the drop lands on the label under the release point.",
+      "goal": "Drag 'SOURCE CARD' onto 'DROP ZONE'.",
+      "candidate_set": "Drag start candidates from finite Stage1 regions of a fresh capture, then composite start-and-end candidates whose ends are the OCR and edge regions of the same window.",
+      "allowed_operations": [
+        "drag"
+      ],
+      "success_predicate": "The target recorded a threshold-crossing drag of SOURCE CARD released on DROP ZONE.",
+      "independent_oracle": "The state file the Tk process writes on every press, motion and release (its PID, presses, started, dropped_on and value), not the screen.",
+      "deadline_ms": 60000,
+      "action_budget": 3,
+      "provider_attempt_budget": 6,
+      "stop_conditions": [
+        "scope_change",
+        "freshness_failure",
+        "lease_failure",
+        "mutation_uncertain",
+        "incomplete_observation",
+        "idle_precondition_denied_at_run_start",
+        "run_deadline_before_later_delivery"
+      ],
+      "expected_send_input_events": "2 buttons and 8 intermediate moves in one native drag"
+    },
+    {
+      "id": "screen-fail-mutex-contention-001",
+      "group": "fail_closed",
+      "initial_state": "A separate Windows-native process owns the exact target session/window-station/desktop mutex.",
+      "goal": "Attempt one screen-grounded click.",
+      "candidate_set": "One valid fresh candidate on a disposable target.",
+      "allowed_operations": [
+        "click"
+      ],
+      "success_predicate": "The run stops before delivery because the mutex cannot be acquired by the deadline.",
+      "independent_oracle": "Journal plus instrumented SendInput call/event count.",
+      "deadline_ms": 3000,
+      "action_budget": 1,
+      "provider_attempt_budget": 1,
+      "stop_conditions": [
+        "mutex_timeout"
+      ],
+      "expected_send_input_events": 0,
+      "live_result": {
+        "status": "live_confirmed",
+        "date": "2026-09-23",
+        "summary": "scripts/check_windows_mcp_mutex_live.py: a separate process holds the real named mutex; run_windows(screen:...) stopped with mutation_state=not_attempted, detail='interaction lease acquisition timed out', 0 SendInput calls.",
+        "target_binding_rule_deviation": "None; a freshly spawned disposable Tk target is resolved immediately before the run."
+      }
+    },
+    {
+      "id": "screen-fail-idle-short-001",
+      "group": "fail_closed",
+      "initial_state": "The exact mutex is available and GetLastInputInfo reports less than 30 seconds idle after mutex acquisition.",
+      "goal": "Attempt one screen-grounded click.",
+      "candidate_set": "One valid fresh candidate on a disposable target.",
+      "allowed_operations": [
+        "click"
+      ],
+      "success_predicate": "The run stops before indicator launch or delivery.",
+      "independent_oracle": "Journal plus indicator-launch record and instrumented SendInput call/event count.",
+      "deadline_ms": 5000,
+      "action_budget": 1,
+      "provider_attempt_budget": 1,
+      "stop_conditions": [
+        "idle_below_30_seconds"
+      ],
+      "expected_send_input_events": 0,
+      "live_result": {
+        "status": "live_confirmed",
+        "date": "2026-09-23",
+        "summary": "scripts/check_windows_mcp_fail_closed_live.py --case idle-short: a real SendInput mouse move immediately before the call, not a mocked reading, drops real GetLastInputInfo idle time under 30s; run_windows(screen:...) stopped with detail='synthetic input idle-time precondition was not met: 1.4s < 30.0s', 0 SendInput calls.",
+        "target_binding_rule_deviation": "None; a freshly spawned disposable Tk target is resolved immediately before the run."
+      }
+    },
+    {
+      "id": "screen-fail-scope-change-001",
+      "group": "fail_closed",
+      "initial_state": "The target HWND/PID or its session/window-station/desktop identity changes between observation and the final under-lease check.",
+      "goal": "Attempt one screen-grounded click.",
+      "candidate_set": "One candidate from the original disposable target observation.",
+      "allowed_operations": [
+        "click"
+      ],
+      "success_predicate": "The run stops before delivery on scope mismatch.",
+      "independent_oracle": "Journal plus instrumented SendInput call/event count.",
+      "deadline_ms": 10000,
+      "action_budget": 1,
+      "provider_attempt_budget": 1,
+      "stop_conditions": [
+        "scope_change"
+      ],
+      "expected_send_input_events": 0,
+      "live_result": {
+        "status": "live_confirmed",
+        "date": "2026-09-23",
+        "summary": "scripts/check_windows_mcp_fail_closed_live.py --case scope-change: WindowsPrintWindowCapture.capture is patched to report a one-pixel-narrower frame on the third call (the re-capture under the lease, after observe()'s baseline and runs.py's pre-act() freshness check both saw the true size), deterministically reproducing what a real resize would trigger. run_windows(screen:...) stopped with mutation_state=uncertain, detail='uncertain mutation: ScopeViolation', 0 SendInput calls.",
+        "fault_injection_deviation": "The scope change is injected at the capture seam rather than produced by a real external window resize, for determinism; the code path exercised (_same_scope -> ScopeViolation -> runs.py's uncertain-mutation handling) is unmodified.",
+        "target_binding_rule_deviation": "None; a freshly spawned disposable Tk target is resolved immediately before the run."
+      }
+    },
+    {
+      "id": "screen-fail-indicator-readiness-001",
+      "group": "fail_closed",
+      "initial_state": "Mutex and idle gates pass, but the indicator child times out, exits, emits a wrong ACK, or cannot prove its Tk window is mapped.",
+      "goal": "Attempt one screen-grounded click.",
+      "candidate_set": "One valid fresh candidate on a disposable target.",
+      "allowed_operations": [
+        "click"
+      ],
+      "success_predicate": "The lease never yields and the run stops before delivery.",
+      "independent_oracle": "Indicator subprocess lifecycle record, journal, and instrumented SendInput call/event count.",
+      "deadline_ms": 10000,
+      "action_budget": 1,
+      "provider_attempt_budget": 1,
+      "stop_conditions": [
+        "indicator_not_ready",
+        "indicator_cleanup_incomplete"
+      ],
+      "expected_send_input_events": 0,
+      "live_result": {
+        "status": "live_confirmed",
+        "date": "2026-09-23",
+        "summary": "scripts/check_windows_mcp_fail_closed_live.py --case indicator-readiness: AutomationIndicator.delivering is patched to raise before yielding, reproducing an indicator that fails to become ready for the current Win32-overlay indicator (ADR-0010) rather than the old Tk-subprocess one this case's description was written against -- the actual invariant under test, that the lease never yields without a trustworthy indicator, is implementation-independent. run_windows(screen:...) stopped with mutation_state=uncertain, detail='uncertain mutation: RuntimeError', 0 SendInput calls.",
+        "description_deviation": "This case's initial_state describes the pre-ADR-0010 Tk-subprocess indicator's failure modes (child timeout, wrong ACK, unmapped window); the current indicator has none of those (no subprocess, no ACK handshake). The fault is injected at the equivalent seam for today's implementation instead.",
+        "target_binding_rule_deviation": "None; a freshly spawned disposable Tk target is resolved immediately before the run."
+      }
+    },
+    {
+      "id": "screen-fail-post-delivery-uncertain-001",
+      "group": "fail_closed",
+      "initial_state": "All gates pass and SendInput begins, then delivery confirmation or lease release fails.",
+      "goal": "Attempt one screen-grounded click.",
+      "candidate_set": "One valid fresh candidate on a disposable target.",
+      "allowed_operations": [
+        "click"
+      ],
+      "success_predicate": "The mutation is uncertain, the run stops, no second SendInput call occurs, and the input environment remains blocked for a subsequent run.",
+      "independent_oracle": "Journal, instrumented SendInput call/event count, and a second-run rejection record.",
+      "deadline_ms": 10000,
+      "action_budget": 1,
+      "provider_attempt_budget": 1,
+      "stop_conditions": [
+        "mutation_uncertain",
+        "lease_release_failure"
+      ],
+      "expected_send_input_events": "0_or_2_but_never_retried",
+      "live_result": {
+        "status": "live_confirmed",
+        "date": "2026-09-23",
+        "summary": "scripts/check_windows_mcp_post_delivery_uncertain_live.py: WindowsSendInputPointer.click performs a real click (real SendInput, 2 events) but always reports it unconfirmed. First run_windows call: mutation_state=uncertain, detail='uncertain mutation: MutationUncertain', environment blocked. Second run_windows call in the same server process, same exclusive_environment_ref, new run_id: rejected immediately with detail='input environment is blocked: synthetic input outcome was not confirmed', mutation_state=not_attempted, and exactly one click call total across both runs (no retry).",
+        "prerequisite_fix": "windows_screen_grounded_adapter_factory built a fresh InputEnvironmentState() per call, so a block never survived past the adapter that set it -- the second half of this case's success_predicate (blocked for a subsequent run) was previously unimplemented, not just untested. Fixed by sharing one InputEnvironmentState at module scope, keyed by ExclusiveInputEnvironment as it already supported; regression test: tests/test_windows_screen_grounded.py::test_blocked_input_environment_is_rejected_by_a_later_separate_run.",
+        "target_binding_rule_deviation": "None; a freshly spawned disposable Tk target is resolved immediately before the run."
+      }
+    }
+  ],
+  "required_metrics": [
+    "wall_time_ms",
+    "provider_calls",
+    "provider_tokens",
+    "action_count",
+    "send_input_calls",
+    "send_input_events",
+    "mutation_certainty",
+    "outcome",
+    "retry_count"
+  ]
+}

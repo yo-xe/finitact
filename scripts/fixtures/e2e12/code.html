@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Code form</title></head>
+<body>
+<label>Order code <input id="code" name="code"></label> <button id="send">Send code</button>
+<p id="status"></p>
+<script>
+document.getElementById("send").onclick = () => {
+  const value = document.getElementById("code").value;
+  fetch("/api/event", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({type: "iframe_form", value})});
+  document.getElementById("status").textContent = `Code ${value} sent.`;
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+<!doctype html><meta charset=utf-8><title>rfd</title>
+<style>body{font:16px sans-serif}.item{background:#cde;margin:6px 0;padding:10px;width:200px}</style>
+<div id=root></div>
+<script type=module>
+import React from "https://esm.sh/react@18.3.1";
+import {createRoot} from "https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1";
+import {DragDropContext,Droppable,Draggable} from "https://esm.sh/@hello-pangea/dnd@16.6.0?deps=react@18.3.1,react-dom@18.3.1";
+const h=React.createElement;
+function App(){const [items,setItems]=React.useState(['a','b','c']);window.state=()=>JSON.stringify(items);
+ return h(DragDropContext,{onDragStart:r=>{(window.__l=window.__l||[]).push('start')},onDragUpdate:r=>{(window.__l=window.__l||[]).push('upd:'+(r.destination&&r.destination.index))},onDragEnd:r=>{(window.__l=window.__l||[]).push('end:'+r.reason+':'+JSON.stringify(r.destination));if(!r.destination)return;setItems(l=>{const n=[...l];const [m]=n.splice(r.source.index,1);n.splice(r.destination.index,0,m);return n})}},
+  h(Droppable,{droppableId:'list'},p=>h('div',{ref:p.innerRef,...p.droppableProps},items.map((id,i)=>h(Draggable,{key:id,draggableId:id,index:i},d=>h('div',{ref:d.innerRef,className:'item',id,...d.draggableProps,...d.dragHandleProps},'Card '+id.toUpperCase()))),p.placeholder)))}
+createRoot(document.getElementById('root')).render(h(App));
+</script>

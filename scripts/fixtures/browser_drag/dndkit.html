@@ -1,0 +1,19 @@
+<!doctype html><meta charset=utf-8><title>dndkit</title>
+<style>body{font:16px sans-serif}.item{background:#cde;margin:6px 0;padding:10px;width:200px;touch-action:none}</style>
+<div id=root></div>
+<script type=module>
+import React from "https://esm.sh/react@18.3.1";
+import {createRoot} from "https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1";
+import {DndContext,closestCenter,PointerSensor,useSensor,useSensors} from "https://esm.sh/@dnd-kit/core@6.1.0?deps=react@18.3.1,react-dom@18.3.1";
+import {SortableContext,useSortable,arrayMove,verticalListSortingStrategy} from "https://esm.sh/@dnd-kit/sortable@8.0.0?deps=react@18.3.1,react-dom@18.3.1,@dnd-kit/core@6.1.0";
+import {CSS} from "https://esm.sh/@dnd-kit/utilities@3.2.2?deps=react@18.3.1";
+const h=React.createElement;
+function Item({id}){const {attributes,listeners,setNodeRef,transform,transition}=useSortable({id});
+ return h('div',{ref:setNodeRef,className:'item',id,style:{transform:CSS.Transform.toString(transform),transition},...attributes,...listeners},'Card '+id.toUpperCase())}
+function App(){const [items,setItems]=React.useState(['a','b','c']);window.state=()=>JSON.stringify(items);
+ const sensors=useSensors(useSensor(PointerSensor,{activationConstraint:{distance:5}}));
+ return h(DndContext,{sensors,collisionDetection:closestCenter,onDragEnd:({active,over})=>{if(over&&active.id!==over.id)setItems(i=>arrayMove(i,i.indexOf(active.id),i.indexOf(over.id)))}},
+  h(SortableContext,{items,strategy:verticalListSortingStrategy},items.map(i=>h(Item,{key:i,id:i}))))}
+createRoot(document.getElementById('root')).render(h(App));
+window.state=window.state||(()=>'loading');
+</script>

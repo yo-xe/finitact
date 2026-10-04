@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="334" viewBox="0 0 700 334" role="img" aria-labelledby="t d">
+<title id="t">Multi-step tasks: median calling-agent tokens</title><desc id="d">Input incl. cache reads + output of the calling agent, N=5 per bar.</desc>
+<style>
+  svg { --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781; --grid:#e1e0d9; --axis:#c3c2b7;
+        --s1:#2a78d6; --s2:#eb6834; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  @media (prefers-color-scheme: dark) {
+    svg { --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --grid:#2c2c2a; --axis:#383835; --s1:#3987e5; --s2:#d95926; }
+  }
+  .bg { fill: var(--surface); } .title { fill: var(--ink); font-size: 15px; font-weight: 600; }
+  .sub { fill: var(--ink2); font-size: 12px; } .label { fill: var(--ink2); font-size: 12px; }
+  .value { fill: var(--ink2); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .grid { stroke: var(--grid); stroke-width: 1; } .axis { stroke: var(--axis); stroke-width: 1; }
+  .ref { stroke: var(--ink2); stroke-width: 1; stroke-dasharray: 4 3; }
+  .s1 { fill: var(--s1); } .s2 { fill: var(--s2); } .stem { stroke: var(--s1); stroke-width: 2; }
+</style>
+<rect class="bg" width="700" height="334" rx="8"/>
+<text class="title" x="16" y="26">Multi-step tasks: median calling-agent tokens</text>
+<text class="sub" x="16" y="44">Input incl. cache reads + output of the calling agent, N=5 per bar.</text>
+<rect class="s1" x="16" y="55" width="10" height="10" rx="2"/>
+<text class="label" x="31" y="64">Finitact</text>
+<rect class="s2" x="126" y="55" width="10" height="10" rx="2"/>
+<text class="label" x="141" y="64">windows-mcp</text>
+<line class="grid" x1="210.0" y1="72" x2="210.0" y2="304"/>
+<text class="tick" x="210.0" y="320" text-anchor="middle">0k</text>
+<line class="grid" x1="280.0" y1="72" x2="280.0" y2="304"/>
+<text class="tick" x="280.0" y="320" text-anchor="middle">200k</text>
+<line class="grid" x1="350.0" y1="72" x2="350.0" y2="304"/>
+<text class="tick" x="350.0" y="320" text-anchor="middle">400k</text>
+<line class="grid" x1="420.0" y1="72" x2="420.0" y2="304"/>
+<text class="tick" x="420.0" y="320" text-anchor="middle">600k</text>
+<line class="grid" x1="490.0" y1="72" x2="490.0" y2="304"/>
+<text class="tick" x="490.0" y="320" text-anchor="middle">800k</text>
+<line class="grid" x1="560.0" y1="72" x2="560.0" y2="304"/>
+<text class="tick" x="560.0" y="320" text-anchor="middle">1000k</text>
+<line class="grid" x1="630.0" y1="72" x2="630.0" y2="304"/>
+<text class="tick" x="630.0" y="320" text-anchor="middle">1200k</text>
+<line class="axis" x1="210" y1="72" x2="210" y2="304"/>
+<text class="label" x="200" y="97" text-anchor="end">E2E-01 launch chat app, post</text>
+<path class="s1" d="M210.0,78.0 H219.5 Q223.5,78.0 223.5,82.0 V88.0 Q223.5,92.0 219.5,92.0 H210.0 Z"><title>Finitact, E2E-01 launch chat app, post: median 38.5k tokens, success 4/5</title></path>
+<text class="value" x="229.5" y="89">38.5k  (4/5)</text>
+<path class="s2" d="M210.0,94.0 H223.8 Q227.8,94.0 227.8,98.0 V104.0 Q227.8,108.0 223.8,108.0 H210.0 Z"><title>windows-mcp, E2E-01 launch chat app, post: median 50.7k tokens, success 5/5</title></path>
+<text class="value" x="233.8" y="105">50.7k</text>
+<text class="label" x="200" y="141" text-anchor="end">E2E-02 AWS estimate to CSV</text>
+<path class="s1" d="M210.0,122.0 H364.6 Q368.6,122.0 368.6,126.0 V132.0 Q368.6,136.0 364.6,136.0 H210.0 Z"><title>Finitact, E2E-02 AWS estimate to CSV: median 453.1k tokens, success 5/5</title></path>
+<text class="value" x="374.6" y="133">453.1k</text>
+<path class="s2" d="M210.0,138.0 H600.5 Q604.5,138.0 604.5,142.0 V148.0 Q604.5,152.0 600.5,152.0 H210.0 Z"><title>windows-mcp, E2E-02 AWS estimate to CSV: median 1127.2k tokens, success 5/5</title></path>
+<text class="value" x="610.5" y="149">1127.2k</text>
+<text class="label" x="200" y="185" text-anchor="end">E2E-03 pick saved email</text>
+<path class="s1" d="M210.0,166.0 H217.5 Q221.5,166.0 221.5,170.0 V176.0 Q221.5,180.0 217.5,180.0 H210.0 Z"><title>Finitact, E2E-03 pick saved email: median 32.9k tokens, success 5/5</title></path>
+<text class="value" x="227.5" y="177">32.9k</text>
+<path class="s2" d="M210.0,182.0 H233.1 Q237.1,182.0 237.1,186.0 V192.0 Q237.1,196.0 233.1,196.0 H210.0 Z"><title>windows-mcp, E2E-03 pick saved email: median 77.3k tokens, success 5/5</title></path>
+<text class="value" x="243.1" y="193">77.3k</text>
+<text class="label" x="200" y="229" text-anchor="end">E2E-04 taskbar, search, scroll</text>
+<path class="s1" d="M210.0,210.0 H258.2 Q262.2,210.0 262.2,214.0 V220.0 Q262.2,224.0 258.2,224.0 H210.0 Z"><title>Finitact, E2E-04 taskbar, search, scroll: median 149.1k tokens, success 5/5</title></path>
+<text class="value" x="268.2" y="221">149.1k</text>
+<path class="s2" d="M210.0,226.0 H247.8 Q251.8,226.0 251.8,230.0 V236.0 Q251.8,240.0 247.8,240.0 H210.0 Z"><title>windows-mcp, E2E-04 taskbar, search, scroll: median 119.3k tokens, success 5/5</title></path>
+<text class="value" x="257.8" y="237">119.3k</text>
+<text class="label" x="200" y="273" text-anchor="end">E2E-05 new folder, drag files</text>
+<path class="s1" d="M210.0,254.0 H242.6 Q246.6,254.0 246.6,258.0 V264.0 Q246.6,268.0 242.6,268.0 H210.0 Z"><title>Finitact, E2E-05 new folder, drag files: median 104.5k tokens, success 5/5</title></path>
+<text class="value" x="252.6" y="265">104.5k</text>
+<path class="s2" d="M210.0,270.0 H323.0 Q327.0,270.0 327.0,274.0 V280.0 Q327.0,284.0 323.0,284.0 H210.0 Z"><title>windows-mcp, E2E-05 new folder, drag files: median 334.4k tokens, success 5/5</title></path>
+<text class="value" x="333.0" y="281">334.4k</text>
+</svg>

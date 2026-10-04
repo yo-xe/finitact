@@ -1,0 +1,47 @@
+[project]
+name = "finitact"
+version = "0.1.0"
+description = "A model-agnostic agent that selects actions from observed finite choices."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+    "browser-harness==0.1.13",
+    "httpx[http2]>=0.28,<1",
+    "mcp>=1.26,<2",
+    "numpy>=2.5.3",
+    "pillow>=11,<13",
+]
+
+[project.optional-dependencies]
+# Stage1 OCR for the screen-grounded Windows path (ADR-0016). OpenVINO wheels are x64-only.
+screen = [
+    "rapidocr>=3.9.2,<4",
+    "onnxruntime>=1.20,<2",
+    "openvino>=2025.0; platform_machine == 'AMD64' or platform_machine == 'x86_64'",
+    # COM UI Automation candidates for the screen path (ADR-0036).
+    "comtypes>=1.4; sys_platform == 'win32'",
+]
+
+[project.scripts]
+finitact = "finitact.inspector:main"
+finitact-mcp = "finitact.mcp_server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = ["pytest>=8.4,<9", "ruff>=0.14,<1"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/compare_decision_providers.py" = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

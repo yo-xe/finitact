@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="510" viewBox="0 0 700 510" role="img" aria-labelledby="t d">
+<title id="t">Short Windows tasks: median time per trial</title><desc id="d">Seconds from launching the calling agent to its exit, N=10 per bar.</desc>
+<style>
+  svg { --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781; --grid:#e1e0d9; --axis:#c3c2b7;
+        --s1:#2a78d6; --s2:#eb6834; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  @media (prefers-color-scheme: dark) {
+    svg { --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --grid:#2c2c2a; --axis:#383835; --s1:#3987e5; --s2:#d95926; }
+  }
+  .bg { fill: var(--surface); } .title { fill: var(--ink); font-size: 15px; font-weight: 600; }
+  .sub { fill: var(--ink2); font-size: 12px; } .label { fill: var(--ink2); font-size: 12px; }
+  .value { fill: var(--ink2); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .grid { stroke: var(--grid); stroke-width: 1; } .axis { stroke: var(--axis); stroke-width: 1; }
+  .ref { stroke: var(--ink2); stroke-width: 1; stroke-dasharray: 4 3; }
+  .s1 { fill: var(--s1); } .s2 { fill: var(--s2); } .stem { stroke: var(--s1); stroke-width: 2; }
+</style>
+<rect class="bg" width="700" height="510" rx="8"/>
+<text class="title" x="16" y="26">Short Windows tasks: median time per trial</text>
+<text class="sub" x="16" y="44">Seconds from launching the calling agent to its exit, N=10 per bar.</text>
+<rect class="s1" x="16" y="55" width="10" height="10" rx="2"/>
+<text class="label" x="31" y="64">Finitact</text>
+<rect class="s2" x="126" y="55" width="10" height="10" rx="2"/>
+<text class="label" x="141" y="64">windows-mcp</text>
+<line class="grid" x1="210.0" y1="72" x2="210.0" y2="480"/>
+<text class="tick" x="210.0" y="496" text-anchor="middle">0</text>
+<line class="grid" x1="294.0" y1="72" x2="294.0" y2="480"/>
+<text class="tick" x="294.0" y="496" text-anchor="middle">10</text>
+<line class="grid" x1="378.0" y1="72" x2="378.0" y2="480"/>
+<text class="tick" x="378.0" y="496" text-anchor="middle">20</text>
+<line class="grid" x1="462.0" y1="72" x2="462.0" y2="480"/>
+<text class="tick" x="462.0" y="496" text-anchor="middle">30</text>
+<line class="grid" x1="546.0" y1="72" x2="546.0" y2="480"/>
+<text class="tick" x="546.0" y="496" text-anchor="middle">40</text>
+<line class="grid" x1="630.0" y1="72" x2="630.0" y2="480"/>
+<text class="tick" x="630.0" y="496" text-anchor="middle">50</text>
+<line class="axis" x1="210" y1="72" x2="210" y2="480"/>
+<text class="label" x="200" y="97" text-anchor="end">Notepad: fill text</text>
+<path class="s1" d="M210.0,78.0 H265.2 Q269.2,78.0 269.2,82.0 V88.0 Q269.2,92.0 265.2,92.0 H210.0 Z"><title>Finitact, Notepad: fill text: median 7.0 s, success 10/10</title></path>
+<text class="value" x="275.2" y="89">7.0</text>
+<path class="s2" d="M210.0,94.0 H469.8 Q473.8,94.0 473.8,98.0 V104.0 Q473.8,108.0 469.8,108.0 H210.0 Z"><title>windows-mcp, Notepad: fill text: median 31.4 s, success 10/10</title></path>
+<text class="value" x="479.8" y="105">31.4</text>
+<text class="label" x="200" y="141" text-anchor="end">Calculator: press 7</text>
+<path class="s1" d="M210.0,122.0 H274.9 Q278.9,122.0 278.9,126.0 V132.0 Q278.9,136.0 274.9,136.0 H210.0 Z"><title>Finitact, Calculator: press 7: median 8.2 s, success 10/10</title></path>
+<text class="value" x="284.9" y="133">8.2</text>
+<path class="s2" d="M210.0,138.0 H448.8 Q452.8,138.0 452.8,142.0 V148.0 Q452.8,152.0 448.8,152.0 H210.0 Z"><title>windows-mcp, Calculator: press 7: median 28.9 s, success 10/10</title></path>
+<text class="value" x="458.8" y="149">28.9</text>
+<text class="label" x="200" y="185" text-anchor="end">VS Code: replace text, save</text>
+<path class="s1" d="M210.0,166.0 H319.8 Q323.8,166.0 323.8,170.0 V176.0 Q323.8,180.0 319.8,180.0 H210.0 Z"><title>Finitact, VS Code: replace text, save: median 13.6 s, success 10/10</title></path>
+<text class="value" x="329.8" y="177">13.6</text>
+<path class="s2" d="M210.0,182.0 H578.5 Q582.5,182.0 582.5,186.0 V192.0 Q582.5,196.0 578.5,196.0 H210.0 Z"><title>windows-mcp, VS Code: replace text, save: median 44.4 s, success 10/10</title></path>
+<text class="value" x="588.5" y="193">44.4</text>
+<text class="label" x="200" y="229" text-anchor="end">Tk: scroll list, select row</text>
+<path class="s1" d="M210.0,210.0 H325.7 Q329.7,210.0 329.7,214.0 V220.0 Q329.7,224.0 325.7,224.0 H210.0 Z"><title>Finitact, Tk: scroll list, select row: median 14.2 s, success 10/10</title></path>
+<text class="value" x="335.7" y="221">14.2</text>
+<path class="s2" d="M210.0,226.0 H524.8 Q528.8,226.0 528.8,230.0 V236.0 Q528.8,240.0 524.8,240.0 H210.0 Z"><title>windows-mcp, Tk: scroll list, select row: median 38.0 s, success 10/10</title></path>
+<text class="value" x="534.8" y="237">38.0</text>
+<text class="label" x="200" y="273" text-anchor="end">Tk: drag card to zone</text>
+<path class="s1" d="M210.0,254.0 H274.9 Q278.9,254.0 278.9,258.0 V264.0 Q278.9,268.0 274.9,268.0 H210.0 Z"><title>Finitact, Tk: drag card to zone: median 8.2 s, success 10/10</title></path>
+<text class="value" x="284.9" y="265">8.2</text>
+<path class="s2" d="M210.0,270.0 H358.0 Q362.0,270.0 362.0,274.0 V280.0 Q362.0,284.0 358.0,284.0 H210.0 Z"><title>windows-mcp, Tk: drag card to zone: median 18.1 s, success 10/10</title></path>
+<text class="value" x="368.0" y="281">18.1</text>
+<text class="label" x="200" y="317" text-anchor="end">Unity: open dropdown</text>
+<path class="s1" d="M210.0,298.0 H287.9 Q291.9,298.0 291.9,302.0 V308.0 Q291.9,312.0 287.9,312.0 H210.0 Z"><title>Finitact, Unity: open dropdown: median 9.8 s, success 10/10</title></path>
+<text class="value" x="297.9" y="309">9.8</text>
+<path class="s2" d="M210.0,314.0 H291.3 Q295.3,314.0 295.3,318.0 V324.0 Q295.3,328.0 291.3,328.0 H210.0 Z"><title>windows-mcp, Unity: open dropdown: median 10.1 s, success 10/10</title></path>
+<text class="value" x="301.3" y="325">10.1</text>
+<text class="label" x="200" y="361" text-anchor="end">Unity: select resolution</text>
+<path class="s1" d="M210.0,342.0 H331.6 Q335.6,342.0 335.6,346.0 V352.0 Q335.6,356.0 331.6,356.0 H210.0 Z"><title>Finitact, Unity: select resolution: median 14.9 s, success 9/10</title></path>
+<text class="value" x="341.6" y="353">14.9  (9/10)</text>
+<path class="s2" d="M210.0,358.0 H386.6 Q390.6,358.0 390.6,362.0 V368.0 Q390.6,372.0 386.6,372.0 H210.0 Z"><title>windows-mcp, Unity: select resolution: median 21.5 s, success 10/10</title></path>
+<text class="value" x="396.6" y="369">21.5</text>
+<text class="label" x="200" y="405" text-anchor="end">Blender: switch workspace</text>
+<path class="s1" d="M210.0,386.0 H348.4 Q352.4,386.0 352.4,390.0 V396.0 Q352.4,400.0 348.4,400.0 H210.0 Z"><title>Finitact, Blender: switch workspace: median 17.0 s, success 10/10</title></path>
+<text class="value" x="358.4" y="397">17.0</text>
+<path class="s2" d="M210.0,402.0 H328.2 Q332.2,402.0 332.2,406.0 V412.0 Q332.2,416.0 328.2,416.0 H210.0 Z"><title>windows-mcp, Blender: switch workspace: median 14.6 s, success 10/10</title></path>
+<text class="value" x="338.2" y="413">14.6</text>
+<text class="label" x="200" y="449" text-anchor="end">Blender: select mode</text>
+<path class="s1" d="M210.0,430.0 H483.6 Q487.6,430.0 487.6,434.0 V440.0 Q487.6,444.0 483.6,444.0 H210.0 Z"><title>Finitact, Blender: select mode: median 33.0 s, success 10/10</title></path>
+<text class="value" x="493.6" y="441">33.0</text>
+<path class="s2" d="M210.0,446.0 H384.1 Q388.1,446.0 388.1,450.0 V456.0 Q388.1,460.0 384.1,460.0 H210.0 Z"><title>windows-mcp, Blender: select mode: median 21.2 s, success 10/10</title></path>
+<text class="value" x="394.1" y="457">21.2</text>
+</svg>

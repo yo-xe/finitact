@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><title>Confirmation</title></head>
+<body>
+<h1>Confirmation</h1>
+<p>Press the button to finish the order checklist.</p>
+<p><button id="done">完了</button> <span id="status"></span></p>
+<script>
+document.getElementById("done").onclick = () => {
+  fetch("/api/event", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({type: "done", opener: !!window.opener})});
+  document.getElementById("status").textContent = "完了しました。";
+};
+</script>
+</body>
+</html>

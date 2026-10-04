@@ -1,0 +1,5 @@
+<!doctype html><meta charset=utf-8><style>body{font:16px sans-serif}.list{width:220px;min-height:150px;border:1px solid #888;margin:10px;padding:6px;float:left}.item{background:#cde;margin:6px 0;padding:8px}</style><title>jqui</title><script src="https://code.jquery.com/jquery-3.7.1.min.js"></script><script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<div id=left class=list><div class=item id=a>Card A</div><div class=item id=b>Card B</div></div>
+<div id=right class="list droppable">Right</div>
+<script>$('.item').draggable({revert:'invalid'});$('#right').droppable({drop:(e,ui)=>{$('#right').append(ui.draggable.css({left:0,top:0}))}});
+window.state=()=>JSON.stringify({left:[...left.children].map(e=>e.id),right:[...right.children].map(e=>e.id)})</script>

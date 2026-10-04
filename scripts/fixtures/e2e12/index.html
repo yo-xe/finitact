@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Order checklist</title>
+<style>iframe { width: 480px; height: 110px; border: 1px solid #999; display: block; margin: 4px 0 16px; } #status { color: #555; }</style></head>
+<body>
+<h1>Order checklist</h1>
+<p>Step 1. Enter the order code in the code form below and send it.</p>
+<iframe id="code-frame" src="code.html" title="Code form"></iframe>
+<p>Step 2. Approve the order in the partner panel below.</p>
+<iframe id="partner-frame" title="Partner panel"></iframe>
+<p>Step 3. Accept the terms.</p>
+<terms-box></terms-box>
+<p>Step 4. <a href="done.html" target="_blank">Open the confirmation page</a> and finish there.</p>
+<p><button id="feedback">Send feedback</button> <span id="status"></span></p>
+<script>
+const post = body => fetch("/api/event", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+document.getElementById("partner-frame").src = `http://localhost:${location.port}/partner.html`;
+document.getElementById("feedback").onclick = () => { post({type: "decoy", label: "Send feedback"}); document.getElementById("status").textContent = "Feedback sent."; };
+customElements.define("terms-box", class extends HTMLElement {
+  connectedCallback() {
+    const root = this.attachShadow({mode: "open"});
+    root.innerHTML = `<p><label><input type="checkbox" id="read"> I have read the terms</label> <button id="accept">Accept terms</button> <span id="s"></span></p>`;
+    root.getElementById("accept").onclick = () => {
+      const read = root.getElementById("read").checked;
+      post({type: "shadow_button", read});
+      root.getElementById("s").textContent = read ? "Terms accepted." : "Check the box first.";
+    };
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Edit items</title>
+<style>td { padding: 4px 12px; } #status { color: #555; }</style></head>
+<body>
+<h1>Edit items</h1>
+<table><tbody id="rows"></tbody></table>
+<p><button id="save">Save</button> <span id="status">No unsaved changes.</span></p>
+<p><a href="list.html">Back to list</a></p>
+<script>
+let items = [];
+let dirty = false;
+const post = (path, body) => fetch(path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+function render() {
+  const rows = document.getElementById("rows");
+  rows.innerHTML = "";
+  for (const name of items) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${name}</td><td><button>Delete</button></td>`;
+    tr.querySelector("button").onclick = () => {
+      const ok = confirm(`Delete "${name}"?`);
+      post("/api/event", {type: "delete", item: name, ok});
+      if (!ok) return;
+      items = items.filter(i => i !== name);
+      dirty = true;
+      document.getElementById("status").textContent = "Unsaved changes.";
+      render();
+    };
+    rows.appendChild(tr);
+  }
+}
+document.getElementById("save").onclick = async () => {
+  await post("/api/save", {items});
+  dirty = false;
+  document.getElementById("status").textContent = "All changes saved.";
+  alert("Saved.");
+};
+window.addEventListener("beforeunload", e => {
+  if (!dirty) return;
+  post("/api/event", {type: "beforeunload"});
+  e.preventDefault();
+  e.returnValue = "";
+});
+fetch("/api/visit?page=edit", {method: "POST"});
+fetch("/api/items").then(r => r.json()).then(d => { items = d.saved.slice(); render(); });
+</script>
+</body>
+</html>

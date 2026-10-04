@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="488" viewBox="0 0 700 488" role="img" aria-labelledby="t d">
+<title id="t">Calling-agent tokens: windows-mcp median ÷ Finitact median</title><desc id="d">Right of 1× means the calling agent used fewer tokens with Finitact. Log scale.</desc>
+<style>
+  svg { --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781; --grid:#e1e0d9; --axis:#c3c2b7;
+        --s1:#2a78d6; --s2:#eb6834; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  @media (prefers-color-scheme: dark) {
+    svg { --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --grid:#2c2c2a; --axis:#383835; --s1:#3987e5; --s2:#d95926; }
+  }
+  .bg { fill: var(--surface); } .title { fill: var(--ink); font-size: 15px; font-weight: 600; }
+  .sub { fill: var(--ink2); font-size: 12px; } .label { fill: var(--ink2); font-size: 12px; }
+  .value { fill: var(--ink2); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .grid { stroke: var(--grid); stroke-width: 1; } .axis { stroke: var(--axis); stroke-width: 1; }
+  .ref { stroke: var(--ink2); stroke-width: 1; stroke-dasharray: 4 3; }
+  .s1 { fill: var(--s1); } .s2 { fill: var(--s2); } .stem { stroke: var(--s1); stroke-width: 2; }
+</style>
+<rect class="bg" width="700" height="488" rx="8"/>
+<text class="title" x="16" y="26">Calling-agent tokens: windows-mcp median ÷ Finitact median</text>
+<text class="sub" x="16" y="44">Right of 1× means the calling agent used fewer tokens with Finitact. Log scale.</text>
+<line class="grid" x1="210.0" y1="76" x2="210.0" y2="454"/>
+<text class="tick" x="210.0" y="470" text-anchor="middle">0.5×</text>
+<line class="ref" x1="315.0" y1="76" x2="315.0" y2="454"/>
+<text class="tick" x="315.0" y="470" text-anchor="middle">1×</text>
+<line class="grid" x1="420.0" y1="76" x2="420.0" y2="454"/>
+<text class="tick" x="420.0" y="470" text-anchor="middle">2×</text>
+<line class="grid" x1="525.0" y1="76" x2="525.0" y2="454"/>
+<text class="tick" x="525.0" y="470" text-anchor="middle">4×</text>
+<line class="grid" x1="630.0" y1="76" x2="630.0" y2="454"/>
+<text class="tick" x="630.0" y="470" text-anchor="middle">8×</text>
+<text class="tick" x="309.0" y="72" text-anchor="end">Finitact higher</text>
+<text class="tick" x="321.0" y="72">windows-mcp higher</text>
+<text class="label" x="200" y="101.0" text-anchor="end">Notepad: fill text</text>
+<line class="stem" x1="315.0" y1="97.0" x2="488.2" y2="97.0"/>
+<circle class="s1" cx="488.2" cy="97.0" r="5"><title>Notepad: fill text: windows-mcp 33109 / Finitact 10550 = 3.14×</title></circle>
+<text class="value" x="498.2" y="101.0" text-anchor="start">3.14×</text>
+<text class="label" x="200" y="127.0" text-anchor="end">Calculator: press 7</text>
+<line class="stem" x1="315.0" y1="123.0" x2="472.3" y2="123.0"/>
+<circle class="s1" cx="472.3" cy="123.0" r="5"><title>Calculator: press 7: windows-mcp 29438 / Finitact 10424 = 2.82×</title></circle>
+<text class="value" x="482.3" y="127.0" text-anchor="start">2.82×</text>
+<text class="label" x="200" y="153.0" text-anchor="end">VS Code: replace text, save</text>
+<line class="stem" x1="315.0" y1="149.0" x2="626.7" y2="149.0"/>
+<circle class="s1" cx="626.7" cy="149.0" r="5"><title>VS Code: replace text, save: windows-mcp 88593.5 / Finitact 11321.5 = 7.83×</title></circle>
+<text class="value" x="636.7" y="153.0" text-anchor="start">7.83×</text>
+<text class="label" x="200" y="179.0" text-anchor="end">Tk: scroll list, select row</text>
+<line class="stem" x1="315.0" y1="175.0" x2="475.0" y2="175.0"/>
+<circle class="s1" cx="475.0" cy="175.0" r="5"><title>Tk: scroll list, select row: windows-mcp 66717 / Finitact 23197.5 = 2.88×</title></circle>
+<text class="value" x="485.0" y="179.0" text-anchor="start">2.88×</text>
+<text class="label" x="200" y="205.0" text-anchor="end">Tk: drag card to zone</text>
+<line class="stem" x1="315.0" y1="201.0" x2="503.3" y2="201.0"/>
+<circle class="s1" cx="503.3" cy="201.0" r="5"><title>Tk: drag card to zone: windows-mcp 37017.5 / Finitact 10677.5 = 3.47×</title></circle>
+<text class="value" x="513.3" y="205.0" text-anchor="start">3.47×</text>
+<text class="label" x="200" y="231.0" text-anchor="end">Unity: open dropdown</text>
+<line class="stem" x1="315.0" y1="227.0" x2="495.8" y2="227.0"/>
+<circle class="s1" cx="495.8" cy="227.0" r="5"><title>Unity: open dropdown: windows-mcp 35034 / Finitact 10621 = 3.30×</title></circle>
+<text class="value" x="505.8" y="231.0" text-anchor="start">3.30×</text>
+<text class="label" x="200" y="257.0" text-anchor="end">Unity: select resolution</text>
+<line class="stem" x1="315.0" y1="253.0" x2="553.8" y2="253.0"/>
+<circle class="s1" cx="553.8" cy="253.0" r="5"><title>Unity: select resolution: windows-mcp 52722.5 / Finitact 10895 = 4.84×</title></circle>
+<text class="value" x="563.8" y="257.0" text-anchor="start">4.84×</text>
+<text class="label" x="200" y="283.0" text-anchor="end">Blender: switch workspace</text>
+<line class="stem" x1="315.0" y1="279.0" x2="427.7" y2="279.0"/>
+<circle class="s1" cx="427.7" cy="279.0" r="5"><title>Blender: switch workspace: windows-mcp 34898 / Finitact 16581 = 2.10×</title></circle>
+<text class="value" x="437.7" y="283.0" text-anchor="start">2.10×</text>
+<text class="label" x="200" y="309.0" text-anchor="end">Blender: select mode</text>
+<line class="stem" x1="315.0" y1="305.0" x2="510.7" y2="305.0"/>
+<circle class="s1" cx="510.7" cy="305.0" r="5"><title>Blender: select mode: windows-mcp 41999 / Finitact 11536 = 3.64×</title></circle>
+<text class="value" x="520.7" y="309.0" text-anchor="start">3.64×</text>
+<text class="label" x="200" y="335.0" text-anchor="end">E2E-01 launch chat app, post</text>
+<line class="stem" x1="315.0" y1="331.0" x2="356.6" y2="331.0"/>
+<circle class="s1" cx="356.6" cy="331.0" r="5"><title>E2E-01 launch chat app, post: windows-mcp 50721 / Finitact 38534 = 1.32×</title></circle>
+<text class="value" x="366.6" y="335.0" text-anchor="start">1.32×</text>
+<text class="label" x="200" y="361.0" text-anchor="end">E2E-02 AWS estimate to CSV</text>
+<line class="stem" x1="315.0" y1="357.0" x2="453.1" y2="357.0"/>
+<circle class="s1" cx="453.1" cy="357.0" r="5"><title>E2E-02 AWS estimate to CSV: windows-mcp 1.12719e+06 / Finitact 453108 = 2.49×</title></circle>
+<text class="value" x="463.1" y="361.0" text-anchor="start">2.49×</text>
+<text class="label" x="200" y="387.0" text-anchor="end">E2E-03 pick saved email</text>
+<line class="stem" x1="315.0" y1="383.0" x2="444.5" y2="383.0"/>
+<circle class="s1" cx="444.5" cy="383.0" r="5"><title>E2E-03 pick saved email: windows-mcp 77301 / Finitact 32887 = 2.35×</title></circle>
+<text class="value" x="454.5" y="387.0" text-anchor="start">2.35×</text>
+<text class="label" x="200" y="413.0" text-anchor="end">E2E-04 taskbar, search, scroll</text>
+<line class="stem" x1="315.0" y1="409.0" x2="281.2" y2="409.0"/>
+<circle class="s1" cx="281.2" cy="409.0" r="5"><title>E2E-04 taskbar, search, scroll: windows-mcp 119298 / Finitact 149106 = 0.80×</title></circle>
+<text class="value" x="271.2" y="413.0" text-anchor="end">0.80×</text>
+<text class="label" x="200" y="439.0" text-anchor="end">E2E-05 new folder, drag files</text>
+<line class="stem" x1="315.0" y1="435.0" x2="491.2" y2="435.0"/>
+<circle class="s1" cx="491.2" cy="435.0" r="5"><title>E2E-05 new folder, drag files: windows-mcp 334379 / Finitact 104487 = 3.20×</title></circle>
+<text class="value" x="501.2" y="439.0" text-anchor="start">3.20×</text>
+</svg>

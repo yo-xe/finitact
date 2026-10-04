@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="206" viewBox="0 0 700 206" role="img" aria-labelledby="t d">
+<title id="t">Decision-only accuracy by provider</title><desc id="d">Share of 130 decisions (13 fixtures × 10) matching the expected choice. Dashed: 90% adoption threshold.</desc>
+<style>
+  svg { --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781; --grid:#e1e0d9; --axis:#c3c2b7;
+        --s1:#2a78d6; --s2:#eb6834; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  @media (prefers-color-scheme: dark) {
+    svg { --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --grid:#2c2c2a; --axis:#383835; --s1:#3987e5; --s2:#d95926; }
+  }
+  .bg { fill: var(--surface); } .title { fill: var(--ink); font-size: 15px; font-weight: 600; }
+  .sub { fill: var(--ink2); font-size: 12px; } .label { fill: var(--ink2); font-size: 12px; }
+  .value { fill: var(--ink2); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .grid { stroke: var(--grid); stroke-width: 1; } .axis { stroke: var(--axis); stroke-width: 1; }
+  .ref { stroke: var(--ink2); stroke-width: 1; stroke-dasharray: 4 3; }
+  .s1 { fill: var(--s1); } .s2 { fill: var(--s2); } .stem { stroke: var(--s1); stroke-width: 2; }
+</style>
+<rect class="bg" width="700" height="206" rx="8"/>
+<text class="title" x="16" y="26">Decision-only accuracy by provider</text>
+<text class="sub" x="16" y="44">Share of 130 decisions (13 fixtures × 10) matching the expected choice. Dashed: 90% adoption threshold.</text>
+<line class="grid" x1="210.0" y1="56" x2="210.0" y2="172"/>
+<text class="tick" x="210.0" y="188" text-anchor="middle">0%</text>
+<line class="grid" x1="294.0" y1="56" x2="294.0" y2="172"/>
+<text class="tick" x="294.0" y="188" text-anchor="middle">20%</text>
+<line class="grid" x1="378.0" y1="56" x2="378.0" y2="172"/>
+<text class="tick" x="378.0" y="188" text-anchor="middle">40%</text>
+<line class="grid" x1="462.0" y1="56" x2="462.0" y2="172"/>
+<text class="tick" x="462.0" y="188" text-anchor="middle">60%</text>
+<line class="grid" x1="546.0" y1="56" x2="546.0" y2="172"/>
+<text class="tick" x="546.0" y="188" text-anchor="middle">80%</text>
+<line class="grid" x1="630.0" y1="56" x2="630.0" y2="172"/>
+<text class="tick" x="630.0" y="188" text-anchor="middle">100%</text>
+<text class="label" x="200" y="86.0" text-anchor="end">TypeSafe Jev</text>
+<path class="s1" d="M210.0,72.0 H580.8 Q584.8,72.0 584.8,76.0 V86.0 Q584.8,90.0 580.8,90.0 H210.0 Z"><title>TypeSafe Jev: 116/130 (89.2%)</title></path>
+<text class="value" x="590.8" y="86.0">89.2%</text>
+<text class="label" x="200" y="120.0" text-anchor="end">Qwen2.5 14B (local)</text>
+<path class="s1" d="M210.0,106.0 H561.4 Q565.4,106.0 565.4,110.0 V120.0 Q565.4,124.0 561.4,124.0 H210.0 Z"><title>Qwen2.5 14B (local): 110/130 (84.6%)</title></path>
+<text class="value" x="571.4" y="120.0">84.6%</text>
+<text class="label" x="200" y="154.0" text-anchor="end">Laya 0.3.21 (local)</text>
+<path class="s1" d="M210.0,140.0 H432.2 Q436.2,140.0 436.2,144.0 V154.0 Q436.2,158.0 432.2,158.0 H210.0 Z"><title>Laya 0.3.21 (local): 70/130 (53.8%)</title></path>
+<text class="value" x="442.2" y="154.0">53.8%</text>
+<line class="ref" x1="588.0" y1="56" x2="588.0" y2="172"/>
+<line class="axis" x1="210" y1="56" x2="210" y2="172"/>
+</svg>

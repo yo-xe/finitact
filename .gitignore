@@ -1,0 +1,31 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+artifacts/
+raw-traces/
+browser-profile/
+playwright-report/
+test-results/
+*.egg-info/
+
+# Local agent/MCP configuration and credentials
+.mcp.json
+.codex/
+*.pem
+*.key
+*.p12
+*.pfx
+
+dist/
+
+# dev の共通契約(dev adopt --sync が配る。ADR-0059)
+.claude/settings.local.json
+.devutil/
+
+# dev consult --bg の実行ログ
+docs/consult/background.log
