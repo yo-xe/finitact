@@ -1,6 +1,6 @@
 # Finitact
 
-**Finitact**は、Jevなどのone decision modelを活用することで、コーディングエージェント(Claude Code、Codex、任意のMCP client)がcomputer useできるようにするMCP server。
+**Finitact**は、コーディングエージェント(Claude Code、Codex、任意のMCP client)にcomputer useをさせるMCP server。Jevなどのone decision modelを活用する。
 Finitactが画面を観測して有限の候補一覧に落とし、小さな判断モデル(現在は[TypeSafeのJev](https://docs.typesafe.ai/introduction))に1つ選ばせ、入力を送り、結果を判定する。
 
 - [English](README.md) 
@@ -122,8 +122,8 @@ sequenceDiagram
 2026-10-04計測。呼び出し元はClaude Code・`claude-sonnet-5-5`、Finitactは単一commit、promptは両系同一。
 条件と限界は[docs/report/](docs/report/)(英語)。
 
-- 短いWindows作業9件(メモ帳、電卓、VS Code、Tk、Unity、Blender)を各10回: windows-mcpは全件10/10、Finitactは8件10/10・
-  1件9/10(Blenderでmenuが開いたまま終了)。Finitactは9件中7件で速く、呼び出し元のエージェントのtokenは全9件で1/1.4〜1/6.5。
+- 短いWindows作業9件(メモ帳、電卓、VS Code、Tk、Unity、Blender)を各10回実行した。windows-mcpは全件10/10、
+  Finitactは8件10/10・1件9/10(Blenderでmenuが開いたまま終了)。Finitactは9件中7件で速く、呼び出し元のエージェントのtokenは全9件で1/1.4〜1/6.5。
 - 多段作業5件を各5回: Finitactは全件5/5。windows-mcpは4件5/5、Wikipedia検索4/5(検索経路を示せず)。tokenは4件で
   少なく(1/1.4〜1/2.6)、1件で多い(1.4倍)。
 - FinitactがJevへ払うtokenはこの数に含まない。Jev分も定価で合算した1試行の費用は14件中13件でFinitactが安く

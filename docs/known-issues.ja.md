@@ -11,7 +11,7 @@
 
 - **[BUG-0023](bugs/0023-screen-210-blocked-0-2.md) 候補が多い画面でJevが正解の代わりにBLOCKEDを選ぶ(中)**
   Windowsのscreen経路で候補が約210件あると、BLOCKEDが低い確率(0.2前後)のまま相対最多となり、操作せずに止まることがある。
-  確信度0.6未満のBLOCKEDは`provider_uncertain`として候補一覧とともに呼び出し元のエージェントへ返るので、呼び出し元のエージェントはgoalの`ref`で候補を
+  確信度0.6未満のBLOCKEDは`provider_uncertain`として候補一覧とともに呼び出し元のエージェントへ返る。呼び出し元のエージェントはgoalの`ref`で候補を
   直接指定して続けられる([ADR-0020](adr/0020-blocked-0-6-provider-uncertain.md)・[ADR-0022](adr/0022-provider-uncertain-agent.md))。Unity解像度メニューの「16:9 Aspect」はアプリ知識の不足として今も残る。
 - **[BUG-0073](bugs/0073-run-windows-chrome-aws-sqs-uia.md) browser窓のラベル無し数値欄へscreen経路で入力できない(中)**
   ChromeのAWS料金計算機のように、UIA名が無くplaceholderしか見えない数値欄は、`run_windows`の既定(screen経路)では

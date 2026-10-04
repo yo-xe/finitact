@@ -27,7 +27,7 @@
 - mutexの放棄を検知したらdesktop単位でプロセス内に記憶し、server再起動まで以後の入力を拒否する([ADR-0013](adr/0013-interaction-mutex-desktop-process-sticky.md))。
 - idle確認の閾値は設定可能で既定1秒。直前の入力が自runのものだけの時は、idleの起点を次runへ引き継ぐ([ADR-0021](adr/0021-run-idle-run.md)・[ADR-0032](adr/0032-screen-idle-1.md))。
 - 送信直前に対象窓を強制前面化し、前面・hit-test検証を通った時だけ送る。入力前に確定した拒否では環境をblockedにしない([ADR-0033](adr/0033-screen.md))。
-- 2操作(popupを開いて選ぶ)では観測範囲を同PID・owner chainのowned popupへ広げ、lockはrun単位で保持する([ADR-0012](adr/0012-screen-2-owned-popup-lease-run.md)、[ADR-0011](adr/0011-screen-two-action-lease-scope.md)を置換)。
+- 2操作(popupを開いて選ぶ)では観測範囲を同PID・owner chainのowned popupへ広げる。lockはrun単位で保持する([ADR-0012](adr/0012-screen-2-owned-popup-lease-run.md)、[ADR-0011](adr/0011-screen-two-action-lease-scope.md)を置換)。
 - 窓間dragは開始窓とdrop窓の2窓契約に限る。drop窓にも保護窓の制限を適用する([ADR-0045](adr/0045-cross-window-drag.md))。
 - 入力の到達が不明な時は自動再送せず、環境をblockedにする([ADR-0006](adr/0006-windows-adapter.md)の運用判断、[ADR-0013](adr/0013-interaction-mutex-desktop-process-sticky.md))。
 
@@ -43,7 +43,7 @@
 
 - 候補へ入力を送れることとその安全性はFinitactが根拠を示して保証する。Jevは実行可能な候補からgoalに合うものを選び、Jevの判断は候補の並べ替えと停止にだけ使う([ADR-0030](adr/0030-finitact-jev.md))。
 - 低確信の選択とBLOCKED(確信度0.6未満)は`provider_uncertain`として呼び出し元のエージェントへ返す。呼び出し元のエージェントは候補を直接指定する。goalの言い換えは候補を指定できない時に使う([ADR-0019](adr/0019-bug-0023-label-agent.md)・[ADR-0020](adr/0020-blocked-0-6-provider-uncertain.md)・[ADR-0022](adr/0022-provider-uncertain-agent.md))。
-- goal単位の完全一致label(`click_label_constraints`)、`fill_values`、providerを使わない`find_and_click`で、Jevの判断を経ずに実行できるようにする([ADR-0024](adr/0024-screen-click-goal-label.md)・[ADR-0026](adr/0026-screen-fill-goal-fill-values.md)・[ADR-0027](adr/0027-label-click-find-and-click-provider.md))。
+- 3つの手段で、Jevの判断を経ずに実行できるようにする。手段はgoal単位の完全一致label(`click_label_constraints`)、`fill_values`、providerを使わない`find_and_click`である([ADR-0024](adr/0024-screen-click-goal-label.md)・[ADR-0026](adr/0026-screen-fill-goal-fill-values.md)・[ADR-0027](adr/0027-label-click-find-and-click-provider.md))。
 - Jevの判断を経ずに実行する指定方法は、goalの`ref`(観測で得た項目ref)1つに統合する([ADR-0041](adr/0041-observe-window-ref-pick.md)・[ADR-0042](adr/0042-run-windows-goal-observe-ref.md)・[ADR-0043](adr/0043-jev-goal-ref.md))。
 
 ## 5. 達成判定
@@ -62,10 +62,10 @@
 
 ## 7. browser経路
 
-- browserとWindowsは制御処理(予算・各判断を1回だけ使うこと・再観測・入力が届いたかの判定・記録)を共通の実装にし、候補源・観測が最新かの確認・送信・成功証拠は経路ごとに実装する([ADR-0037](adr/0037-browser-windows.md))。
+- browserとWindowsは制御処理を共通の実装にする。制御処理は予算・各判断を1回だけ使うこと・再観測・入力が届いたかの判定・記録である。候補源・観測が最新かの確認・送信・成功証拠は経路ごとに実装する([ADR-0037](adr/0037-browser-windows.md))。
 - dragは`extra_operations=["drag"]`のopt-inで、2段で送信する([ADR-0046](adr/0046-browser-drag-opt-in-2-drag.md))。JS dialogは有限候補として扱う([ADR-0047](adr/0047-browser-js-dialog.md))。
-- browser経路で操作できない要素(iframe・open shadow root・popup link)の件数と、そのタブを表示している窓の`screen_target`を結果に含め、呼び出し元のエージェントがscreen経路へ切り替えられるようにする([ADR-0048](adr/0048-browser-boundary-screen-handoff.md))。
-- `run_windows`はbrowser窓のpage goalを、条件が揃い明示的に有効化された時だけbrowser経路で実行する(`routing=browser_if_singleton`、`FINITACT_WINDOW_BROWSER_ROUTE=1`)([ADR-0051](adr/0051-run-windows-browser-tab-browser.md))。
+- browser経路で操作できない要素(iframe・open shadow root・popup link)の件数を結果に含める。そのタブを表示している窓の`screen_target`も含め、呼び出し元のエージェントがscreen経路へ切り替えられるようにする([ADR-0048](adr/0048-browser-boundary-screen-handoff.md))。
+- `run_windows`はbrowser窓のpage goalを、条件が揃い明示的に有効化された時だけbrowser経路で実行する([ADR-0051](adr/0051-run-windows-browser-tab-browser.md))。有効化は`routing=browser_if_singleton`か`FINITACT_WINDOW_BROWSER_ROUTE=1`で行う。
 
 ## 8. 評価と公開
 
