@@ -19,6 +19,7 @@
 - browserとWindows UIAの候補は、scroll領域(またはページ)に隠れているだけの要素も領域の高さ1つ分以内・近い順40個まで含め、どちら側かを付ける。送信前にscrollして可視・最前面を確かめる(ADR-0038)。
 - browserの操作後は部品の期待状態(checkboxの反転・radioの選択・selectの値・fillの値)を照合する。Windowsのclick後はUIA Toggle・SelectionItemの期待状態を照合する。照合結果`met/not_met/unknown`は履歴に載せ、`not_met`はgoal結果の`unmet_effects`に事実として載せる。`not_met`は同じ観測状態・同じ入力の間だけ再提示しない。拒否理由は推論しない(ADR-0039)。
 - browserのrun結果は、終了時のページ要約`final_state`を持つ。内容はURL・タイトル・開いているダイアログの文言・入力を拒否された欄と理由・表示文字の先頭40行/2000字である。例外で止まったgoalのdetailは型と短い理由(E2E-I27・I28)。
+- `run_browser`は`BU_CDP_URL`/`BU_CDP_WS`、CDPを待ち受ける利用者のbrowserの順に接続し、どちらも無ければFinitact専用profileでChrome(無ければEdge)を起動・再利用する。その時`final_state.browser_profile="finitact"`を返す(ADR-0054)。
 - STDIO MCPは`run_browser`、`run_windows`、`cancel_run`、`get_run_journal`、`list_windows`、`observe_window`、`observe_browser`を公開する。
   run ID、deadline、action/provider budget、許可origin/operationを必須境界とする。同一requestの完了済みrunは再送信せずreplayする。
 - `TYPE_TEXT` のときだけ text LLM を呼び、構造化された短い文字列を生成する。

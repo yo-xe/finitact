@@ -660,8 +660,12 @@ class RunCoordinator:
             if page is not None:
                 from .browser_inventory import final_state
 
-                downloads = getattr(getattr(adapter, "browser", None), "downloads", None)
-                result = replace(result, final_state=final_state(page, downloads() if callable(downloads) else ()))
+                browser = getattr(adapter, "browser", None)
+                downloads = getattr(browser, "downloads", None)
+                state = final_state(page, downloads() if callable(downloads) else ())
+                if getattr(browser, "dedicated", False) is True:
+                    state["browser_profile"] = "finitact"
+                result = replace(result, final_state=state)
             return result
         finally:
             with self._lock:

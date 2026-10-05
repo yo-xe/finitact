@@ -1,6 +1,6 @@
 [project]
 name = "finitact"
-version = "0.1.1"
+version = "0.1.2"
 description = "A model-agnostic agent that selects actions from observed finite choices."
 readme = "README.md"
 license = "MIT"

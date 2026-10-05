@@ -169,7 +169,7 @@ same prompt for both systems. Details and limits are in [docs/report/](docs/repo
 | Python 3.12+ and [uv](https://docs.astral.sh/uv/) | everything | |
 | TypeSafe API key (`TYPESAFE_API_KEY`) | every run | Jev chooses each action. Get a key from [TypeSafe](https://docs.typesafe.ai) |
 | OpenAI-compatible text model key (`TEXT_MODEL_API_KEY`) | fill goals without `fill_values` | Composes the text to type. The default endpoint is OpenRouter (`.env.example`) |
-| Chrome started with `--remote-debugging-port` | `run_browser` | See [Prerequisites for browser operation](#prerequisites-for-browser-operation) |
+| Chrome or Edge installed | `run_browser` | See [Prerequisites for browser operation](#prerequisites-for-browser-operation) |
 | Windows 10/11 x64, Windows-native Python 3.12 with the `screen` extra | `run_windows` | OCR is RapidOCR (ONNX Runtime / OpenVINO), installed by pip. RapidOCR downloads its models once. You do not need Tesseract or other system OCR. UI Automation uses `comtypes` |
 
 The server reads the checkout's `.env` at start-up (variables set by the MCP client take precedence), so the keys
@@ -184,19 +184,20 @@ cp .env.example .env   # set TYPESAFE_API_KEY (and TEXT_MODEL_API_KEY for genera
 
 ### Browser
 
-Start Chrome with remote debugging (we recommend a disposable profile), then register the server with your MCP
-client:
+Register the server with your MCP client:
 
 ```bash
 claude mcp add finitact -- uv --directory /path/to/finitact run finitact-mcp
 ```
 
-Set `BU_CDP_URL=http://127.0.0.1:9222` if Chrome listens on a non-default endpoint.
+Set `BU_CDP_URL` to use a specific Chrome that listens for CDP.
 
 #### Prerequisites for browser operation
 
-`run_browser` needs a Chrome reachable over CDP: started with `--remote-debugging-port` (default `9222`, otherwise
-`BU_CDP_URL`). `run_windows` hands a goal on a Chrome window to the browser path only when all of these conditions hold.
+`run_browser` uses a browser that already listens for CDP (`BU_CDP_URL`, port `9222`/`9223`, or one enabled in
+`chrome://inspect`). If there is none, Finitact starts Chrome (or Edge when Chrome is missing) on its own profile
+(`FINITACT_BROWSER_PROFILE`, binary `FINITACT_BROWSER_PATH`). That profile holds none of your sign-ins, and the result
+then has `final_state.browser_profile = "finitact"` (ADR-0054). `run_windows` hands a goal on a Chrome window to the browser path only when all of these conditions hold.
 Otherwise it stays on screen input:
 
 - enabled by `routing: "browser_if_singleton"` on the call, or by `FINITACT_WINDOW_BROWSER_ROUTE=1` for calls that omit `routing`.

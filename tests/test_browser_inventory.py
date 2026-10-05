@@ -148,18 +148,60 @@ def test_download_watch_uses_the_owned_tab_session(monkeypatch, tab_id):
     assert tab_id or ("Target.closeTarget", None) in calls
 
 
-def test_start_harness_fails_fast_without_a_browser(monkeypatch):
-    from finitact import browser as module
-
-    started = []
+def _local_mode(monkeypatch, module, *, alive=False, answers=True, kind="local", attachable=False, running=None):
+    events = []
     monkeypatch.delenv("BU_CDP_URL", raising=False)
     monkeypatch.delenv("BU_CDP_WS", raising=False)
-    monkeypatch.setattr(module, "daemon_alive", lambda: False)
-    monkeypatch.setattr(module, "supported_browser_running", lambda: False)
-    monkeypatch.setattr(module, "ensure_daemon", lambda **kw: started.append(kw))
-    with pytest.raises(RuntimeError, match="chrome-not-running"):
-        module.start_harness()
-    assert not started
+    monkeypatch.setattr(module, "daemon_alive", lambda: alive)
+    monkeypatch.setattr(module, "_daemon_answers_cdp", lambda: answers)
+    monkeypatch.setattr(module, "daemon_browser_kind", lambda: kind)
+    monkeypatch.setattr(module, "_reset_daemon", lambda: events.append("reset"))
+    monkeypatch.setattr(module, "user_browser_attachable", lambda: attachable)
+    monkeypatch.setattr(module, "dedicated_endpoint", lambda: running)
+    monkeypatch.setattr(module, "launch_dedicated", lambda: events.append("launch") or "http://127.0.0.1:50001")
+    monkeypatch.setattr(module, "ensure_daemon", lambda **kw: events.append(("ensure", kw)))
+    return events
+
+
+def test_start_harness_launches_the_finitact_profile_without_a_cdp_browser(monkeypatch):
+    from finitact import browser as module
+
+    events = _local_mode(monkeypatch, module)
+    assert module.start_harness(startup_wait_s=7.0) is True
+    assert events == ["launch", ("ensure", {"wait": 7.0, "env": {"BU_CDP_URL": "http://127.0.0.1:50001"}})]
+
+
+def test_start_harness_reuses_a_running_finitact_profile(monkeypatch):
+    from finitact import browser as module
+
+    events = _local_mode(monkeypatch, module, running="http://127.0.0.1:50002")
+    assert module.start_harness(startup_wait_s=7.0) is True
+    assert events == [("ensure", {"wait": 7.0, "env": {"BU_CDP_URL": "http://127.0.0.1:50002"}})]
+
+
+def test_start_harness_prefers_a_user_browser_that_listens_for_cdp(monkeypatch):
+    from finitact import browser as module
+
+    events = _local_mode(monkeypatch, module, attachable=True, running="http://127.0.0.1:50002")
+    assert module.start_harness() is False
+    assert events == [("ensure", {})]
+
+
+def test_start_harness_defers_to_a_live_daemon(monkeypatch):
+    from finitact import browser as module
+
+    events = _local_mode(monkeypatch, module, alive=True)
+    assert module.start_harness() is False and not events
+    events = _local_mode(monkeypatch, module, alive=True, kind="cdp")
+    assert module.start_harness() is True and not events
+
+
+def test_start_harness_replaces_a_daemon_whose_browser_closed(monkeypatch):
+    from finitact import browser as module
+
+    events = _local_mode(monkeypatch, module, alive=True, answers=False, kind="cdp")
+    assert module.start_harness(startup_wait_s=7.0) is True
+    assert events[:2] == ["reset", "launch"]
 
 
 def test_start_harness_fails_fast_on_unreachable_cdp_url(monkeypatch):
@@ -181,17 +223,6 @@ def test_start_harness_fails_fast_on_unreachable_cdp_url(monkeypatch):
     assert time.monotonic() - begun < 3 and not started
 
 
-def test_start_harness_defers_to_a_live_daemon(monkeypatch):
-    from finitact import browser as module
-
-    started = []
-    monkeypatch.setattr(module, "daemon_alive", lambda: True)
-    monkeypatch.setattr(module, "supported_browser_running", lambda: False)
-    monkeypatch.setattr(module, "ensure_daemon", lambda **kw: started.append(kw))
-    module.start_harness()
-    assert started
-
-
 def test_start_harness_bounds_a_stuck_cdp_daemon_and_restarts_it_once(monkeypatch):
     from finitact import browser as module
 
@@ -208,7 +239,7 @@ def test_start_harness_bounds_a_stuck_cdp_daemon_and_restarts_it_once(monkeypatc
     monkeypatch.setattr(module, "ensure_daemon", ensure_daemon)
     monkeypatch.setattr(module, "_reset_daemon", lambda: resets.append(True))
     module.start_harness(startup_wait_s=7.0)
-    assert started == [{"wait": 7.0}, {"wait": 7.0}] and resets == [True]
+    assert started == [{"wait": 7.0, "env": None}] * 2 and resets == [True]
 
 
 def test_start_harness_stops_a_stale_cdp_daemon_before_the_harness_sees_it(monkeypatch):

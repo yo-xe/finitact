@@ -12,10 +12,11 @@ from pathlib import Path
 
 from browser_harness import _ipc as harness_ipc
 from browser_harness.admin import NAME as HARNESS_NAME
-from browser_harness.admin import _is_daemon_process, _pid_number, daemon_alive, ensure_daemon
-# Importing the daemon module also loads the harness .env, so BU_CDP_URL is seen as the daemon sees it.
-from browser_harness.daemon import supported_browser_running
+from browser_harness.admin import _is_daemon_process, _pid_number, daemon_alive, daemon_browser_kind, ensure_daemon
 from browser_harness.helpers import _send, cdp, drain_events
+
+# Importing browser_launch loads the harness daemon module and its .env, so BU_CDP_URL is seen as the daemon sees it.
+from .browser_launch import dedicated_endpoint, launch_dedicated, user_browser_attachable
 
 # Atomically read visible content and controls, preserving actual DOM node identity.
 READ_STATE = Path(__file__).with_name("snapshot.js").read_text(encoding="utf-8")
@@ -200,7 +201,9 @@ def track_downloads(events, downloads):
 
 
 def start_harness(probe_timeout_s=2.0, startup_wait_s=15.0):
-    """Start the harness daemon, failing at once when no browser can answer CDP."""
+    """Start the harness daemon; return True when it drives the Finitact profile rather than a user browser."""
+    if not (os.environ.get("BU_CDP_URL") or os.environ.get("BU_CDP_WS")):
+        return _start_local(startup_wait_s)
     # BUG-0042: without a browser the harness launched one and retried under 60s windows, costing about 120 seconds.
     if not daemon_alive():
         if url := os.environ.get("BU_CDP_URL"):
@@ -212,11 +215,25 @@ def start_harness(probe_timeout_s=2.0, startup_wait_s=15.0):
                 raise RuntimeError(
                     f"chrome-not-running: BU_CDP_URL={url} unreachable ({exc}) -- start Chrome with --remote-debugging-port, then retry"
                 ) from exc
-        elif not os.environ.get("BU_CDP_WS") and not supported_browser_running():
-            raise RuntimeError("chrome-not-running: no supported Chromium-family browser is running -- start Chrome, then retry")
-    if not (os.environ.get("BU_CDP_URL") or os.environ.get("BU_CDP_WS")):
+    _start_cdp(startup_wait_s)
+    return False
+
+
+def _start_local(startup_wait_s):
+    # ADR-0054: a user browser that already listens for CDP comes first; otherwise the Finitact profile is reused or
+    # launched, since the harness's own relaunch of the default profile cannot open CDP without the user (BUG-0078).
+    if daemon_alive():
+        if _daemon_answers_cdp():
+            return daemon_browser_kind() == "cdp"
+        _reset_daemon()
+    if user_browser_attachable():
         ensure_daemon()  # a local Chrome's approval popup may need the user, so its wait stays unbounded
-        return
+        return False
+    _start_cdp(startup_wait_s, {"BU_CDP_URL": dedicated_endpoint() or launch_dedicated()})
+    return True
+
+
+def _start_cdp(startup_wait_s, env=None):
     # BUG-0043: after the CDP Chrome restarts, a daemon can listen yet never answer ping, or the old endpoint file
     # refuses deletion (WinError 5); the harness then waited its full 60 seconds. A healthy start takes under 5.
     # A stale daemon is stopped here so the harness never reaches restart_daemon, which on Windows terminates the
@@ -224,12 +241,12 @@ def start_harness(probe_timeout_s=2.0, startup_wait_s=15.0):
     if daemon_alive() and not _daemon_answers_cdp():
         _reset_daemon()
     try:
-        ensure_daemon(wait=startup_wait_s)
+        ensure_daemon(wait=startup_wait_s, env=env)
     except (RuntimeError, OSError) as exc:
         if str(exc).startswith(("chrome-not-running", "permission-blocked", "remote-debugging-setup")):
             raise
         _reset_daemon()
-        ensure_daemon(wait=startup_wait_s)
+        ensure_daemon(wait=startup_wait_s, env=env)
 
 
 def _daemon_answers_cdp():
@@ -307,7 +324,8 @@ def _reset_daemon(exit_wait_s=3.0, settle_s=10.0):
 
 class Browser:
     def __init__(self, url, width=1120, height=780, mobile=False, *, tab_id=None, keep=False, drag=False):
-        start_harness()
+        # The Finitact profile holds none of the user's sign-ins; the result says so (ADR-0054).
+        self.dedicated = start_harness()
         # ADR-0046: drag sources and drop areas are read only for a run that asked for drag.
         self.drag = drag
         # E2E-I15: a run may continue in a tab an earlier run kept; that tab is never navigated, resized or closed.

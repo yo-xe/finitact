@@ -150,7 +150,7 @@ Finitactでできない作業は、エージェントが自分の道具(shellや
 ## 導入
 
 必要なもの: Python 3.12+とuv、TypeSafe API key(`TYPESAFE_API_KEY`、全run)、OpenAI互換text modelのkey
-(`TEXT_MODEL_API_KEY`、`fill_values`無しの入力goalだけ)、`run_browser`はCDP接続したChrome、`run_windows`は
+(`TEXT_MODEL_API_KEY`、`fill_values`無しの入力goalだけ)、`run_browser`はChromeかEdge(CDP待ち受けのbrowserが無ければ専用profileで自動起動)、`run_windows`は
 Windows 10/11 x64のWindows-native Pythonと`screen` extra(OCRはpipで入るRapidOCR。Tesseract等の別途導入は不要)。
 keyは`.env.example`を`.env`へ複製して書く。serverは起動時にcheckoutの`.env`を読む  
 セットアップ手順・tool一覧・安全機構と制約は[英語版](README.md#setup)を参照のこと  
