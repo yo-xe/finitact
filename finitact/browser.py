@@ -1,5 +1,6 @@
 """Observed actions through Browser Harness; one CDP session, no per-step subprocess."""
 
+import contextlib
 import hashlib
 import json
 import os
@@ -227,7 +228,7 @@ def _start_local(startup_wait_s):
             return daemon_browser_kind() == "cdp"
         _reset_daemon()
     if user_browser_attachable():
-        ensure_daemon()  # a local Chrome's approval popup may need the user, so its wait stays unbounded
+        _ensure_daemon_detached()  # a local Chrome's approval popup may need the user, so its wait stays unbounded
         return False
     _start_cdp(startup_wait_s, {"BU_CDP_URL": dedicated_endpoint() or launch_dedicated()})
     return True
@@ -241,12 +242,41 @@ def _start_cdp(startup_wait_s, env=None):
     if daemon_alive() and not _daemon_answers_cdp():
         _reset_daemon()
     try:
-        ensure_daemon(wait=startup_wait_s, env=env)
+        _ensure_daemon_detached(wait=startup_wait_s, env=env)
     except (RuntimeError, OSError) as exc:
         if str(exc).startswith(("chrome-not-running", "permission-blocked", "remote-debugging-setup")):
             raise
         _reset_daemon()
-        ensure_daemon(wait=startup_wait_s, env=env)
+        _ensure_daemon_detached(wait=startup_wait_s, env=env)
+
+
+def _ensure_daemon_detached(**kwargs):
+    # BUG-0079: the harness spawns the daemon with stdin=None, so the child inherits the MCP server's stdio pipe
+    # and the daemon start stalls ~35s behind it. Point the standard input handle at the null device meanwhile.
+    with _null_stdin():
+        ensure_daemon(**kwargs)
+
+
+@contextlib.contextmanager
+def _null_stdin():
+    if sys.platform == "win32":
+        import ctypes
+        import msvcrt
+
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        kernel32.GetStdHandle.restype = ctypes.c_void_p
+        kernel32.SetStdHandle.argtypes = [ctypes.c_ulong, ctypes.c_void_p]
+        stdin_id = ctypes.c_ulong(-10 & 0xFFFFFFFF).value
+        saved = kernel32.GetStdHandle(stdin_id)
+        null_fd = os.open(os.devnull, os.O_RDONLY)
+        try:
+            kernel32.SetStdHandle(stdin_id, msvcrt.get_osfhandle(null_fd))
+            yield
+        finally:
+            kernel32.SetStdHandle(stdin_id, saved)
+            os.close(null_fd)
+    else:
+        yield  # swapping fd 0 would feed EOF to the MCP stdin reader; only Windows handle inheritance is affected
 
 
 def _daemon_answers_cdp():

@@ -1583,6 +1583,8 @@ public static class FinitactPointer {
         if (!SetCursorPos(x, y)) { complete = false; break; }
         System.Threading.Thread.Sleep(8);
       }
+      // The drop target lives in another process; it must see the pointer over it before the button goes up.
+      System.Threading.Thread.Sleep(150);
     } finally {
       var up = new INPUT[1]; up[0].type = 0; up[0].u.mi.dwFlags = 0x0004;
       if (SendInput(1, up, Marshal.SizeOf(typeof(INPUT))) != 1) complete = false;

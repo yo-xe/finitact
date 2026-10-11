@@ -744,15 +744,18 @@ def e2e05_prepare(system: str, stamp: int) -> dict:
     if not work or not archive or work["hwnd"] == archive["hwnd"] or {work["view"], archive["view"]} != {4}:
         raise SystemExit(f"initial state missed: {found}")
     activate_terminal()
-    return found
+    # Explorer's Quick Access sidebar keeps every folder a trial opened; a fixed name left same-named decoys inside the
+    # work window, and drags landed there (E2E-05 0/3 on 2026-10-11).
+    return {**found, "folder": f"batch-{time.strftime('%m%d-%H%M%S', time.localtime(stamp))}"}
 
 
 def e2e05_prompt(system: str, context: dict) -> str:
+    folder = context["folder"]
     return (
         'Goal: two File Explorer windows are open side by side: "work" on the left and "archive" on the right. '
-        f'In the archive window, create a new folder named {E2E05_FOLDER} from the right-click context menu (New, '
+        f'In the archive window, create a new folder named {folder} from the right-click context menu (New, '
         "then Folder). Then, in the work window, select alpha.txt and beta.txt together and drag them onto the "
-        f"{E2E05_FOLDER} folder in the archive window so that they move there. gamma.txt stays in work."
+        f"{folder} folder in the archive window so that they move there. gamma.txt stays in work."
     )
 
 
@@ -768,11 +771,12 @@ def _entries(path: Path) -> dict:
 def e2e05_judge(context: dict) -> tuple[bool, dict]:
     work = _entries(E2E05_ROOT_WSL / "work")
     archive = _entries(E2E05_ROOT_WSL / "archive")
-    batch = _entries(E2E05_ROOT_WSL / "archive" / E2E05_FOLDER)
+    folder = context.get("folder", E2E05_FOLDER)
+    batch = _entries(E2E05_ROOT_WSL / "archive" / folder)
     moved = batch == {name: name for name in E2E05_MOVED}
     # A copy leaves the originals in work; that and a one-by-one move pass, the method is read from the stream.
     kept = set(work) in ({"gamma.txt"}, set(E2E05_FILES)) and work.get("gamma.txt") == "gamma.txt"
-    success = moved and kept and set(archive) == {E2E05_FOLDER}
+    success = moved and kept and set(archive) == {folder}
     explorer(prepare=False)
     return success, {
         "work": sorted(work),
