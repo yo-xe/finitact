@@ -334,7 +334,15 @@ class Browser:
             self.target = tab_id
             if self._reuse(KEPT.pop(tab_id, None)):
                 return
-            self._attach()
+            try:
+                self._attach()
+            except Exception as exc:  # noqa: BLE001 - only a missing target is rewritten
+                if "No target with given id" not in str(exc):
+                    raise
+                raise ValueError(
+                    f"unknown tab_id {tab_id!r}: a tab_id is the value a run_browser result returned with keep_tab true; "
+                    "start a run_browser with keep_tab true to get one"
+                ) from exc
             self.call("Emulation.setFocusEmulationEnabled", enabled=True)
             return
         self.target = cdp("Target.createTarget", url="about:blank", background=True)["targetId"]

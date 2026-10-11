@@ -19,6 +19,7 @@ from .runs import Goal, WindowsRunRequest
 
 # Candidate labels are OCR text; beyond this the caller should narrow with ``contains``.
 OBSERVE_MAX_ITEMS = 200
+ELEVATION_PROMPT_NOTE = "a UAC prompt is open on the secure desktop; input here does not reach it. Ask the user to answer it"
 TEXT_INPUT_CONTROL_TYPES = ("ControlType.Edit", "ControlType.ComboBox", "ControlType.Document")
 # BUG-0041: the outer agent runs in a terminal; acting on one can minimize or type into its own session.
 # FINITACT_PROTECTED_PROCESSES replaces the list (comma-separated; empty allows every window).
@@ -287,7 +288,44 @@ def observe_window(
         from .browser_inventory import WITHHELD
 
         view["screenshot"] = WITHHELD
+    if elevation_prompt_pending():
+        view["elevation_prompt"] = ELEVATION_PROMPT_NOTE
     return view
+
+
+def elevation_prompt_pending() -> bool:
+    """True while a UAC prompt (consent.exe) is up. Its secure desktop is invisible to window listing and swallows input."""
+
+    if os.name != "nt":
+        return False
+
+    class ProcessEntry(ctypes.Structure):
+        _fields_ = [
+            ("dwSize", wintypes.DWORD), ("cntUsage", wintypes.DWORD), ("th32ProcessID", wintypes.DWORD),
+            ("th32DefaultHeapID", ctypes.c_size_t), ("th32ModuleID", wintypes.DWORD), ("cntThreads", wintypes.DWORD),
+            ("th32ParentProcessID", wintypes.DWORD), ("pcPriClassBase", ctypes.c_long), ("dwFlags", wintypes.DWORD),
+            ("szExeFile", ctypes.c_wchar * 260),
+        ]
+
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel32.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
+    kernel32.CreateToolhelp32Snapshot.argtypes = [wintypes.DWORD, wintypes.DWORD]
+    kernel32.Process32FirstW.argtypes = kernel32.Process32NextW.argtypes = [wintypes.HANDLE, ctypes.POINTER(ProcessEntry)]
+    kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
+    snapshot = kernel32.CreateToolhelp32Snapshot(0x2, 0)  # TH32CS_SNAPPROCESS
+    if snapshot in (None, wintypes.HANDLE(-1).value):
+        return False
+    try:
+        entry = ProcessEntry()
+        entry.dwSize = ctypes.sizeof(ProcessEntry)
+        more = kernel32.Process32FirstW(snapshot, ctypes.byref(entry))
+        while more:
+            if entry.szExeFile.lower() == "consent.exe":
+                return True
+            more = kernel32.Process32NextW(snapshot, ctypes.byref(entry))
+        return False
+    finally:
+        kernel32.CloseHandle(snapshot)
 
 
 def frame_png(frame) -> bytes:
@@ -360,12 +398,20 @@ def observation_items(
         by_key[(label, rect)] = item
         items.append(item)
     matching = [item for item in items if _folded(contains) in _folded(item["label"])] if contains else items
+    # Usage feedback 2026-10-10: a bare observation returned 74-87 items, mostly scrolled out with placeholder rects.
+    # They stay reachable through contains, and their count tells the reader that the list scrolls.
+    scrolled_out = 0
+    if not contains:
+        scrolled_out = sum(1 for item in matching if item.get("offscreen"))
+        matching = [item for item in matching if not item.get("offscreen")]
     view = {
         "total": len(items),
         "matched": len(matching),
         "items": matching[:OBSERVE_MAX_ITEMS],
         "truncated": len(matching) > OBSERVE_MAX_ITEMS,
     }
+    if scrolled_out:
+        view["offscreen_omitted"] = scrolled_out
     return {**view, "refs": refs} if with_refs else view
 
 

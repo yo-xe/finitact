@@ -250,3 +250,14 @@ def test_resolve_window_takes_the_one_visible_window_over_minimized_namesakes():
     assert resolve_window("(Unsaved) - Blender", windows) == "window:2:20"
     with pytest.raises(ValueError, match="2 windows match"):
         resolve_window("(Unsaved) - Blender", [{**w, "minimized": False} for w in windows])
+
+
+def test_bare_observation_leaves_out_scrolled_out_items_but_counts_them():
+    visible = ObservedCandidate("a", "click", "Chrome", "r1", attributes={"rect": (1, 2, 3, 4)})
+    hidden = ObservedCandidate("b", "click", "Chrome 2", "r2", attributes={"rect": (0, 0, 9, 9), "offscreen": "scrolled into view"})
+    bare = observation_items([visible, hidden], None)
+    assert [item["label"] for item in bare["items"]] == ["Chrome"]
+    assert (bare["total"], bare["matched"], bare["offscreen_omitted"]) == (2, 1, 1)
+    named = observation_items([visible, hidden], "chrome")
+    assert [item["label"] for item in named["items"]] == ["Chrome", "Chrome 2"]
+    assert "offscreen_omitted" not in named

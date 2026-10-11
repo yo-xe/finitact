@@ -378,3 +378,15 @@ def test_window_browser_route_probe_uses_browser_level_cdp_not_the_harness_page_
     assert mcp_server._browser_route_for(omitted, omitted).tab_id == "T1"
     explicit = omitted.model_copy(update={"routing": "windows_only"})
     assert mcp_server._browser_route_for(explicit, explicit) is None
+
+
+def test_list_windows_reports_a_pending_uac_prompt(monkeypatch):
+    from finitact import windows_inventory
+
+    monkeypatch.setattr(windows_inventory, "list_windows", lambda title_contains=None: [{"hwnd": 7, "pid": 3, "title": "a"}])
+    monkeypatch.setattr(windows_inventory, "elevation_prompt_pending", lambda: False)
+    assert "elevation_prompt" not in asyncio.run(mcp_server.list_windows())
+    monkeypatch.setattr(windows_inventory, "elevation_prompt_pending", lambda: True)
+    listing = asyncio.run(mcp_server.list_windows())
+    assert listing["windows"][0]["target_id"] == "window:7:3"
+    assert "UAC" in listing["elevation_prompt"]

@@ -16,7 +16,10 @@ OBSERVE_MAX_ITEMS = 200
 OBSERVE_MAX_LINES = 200
 
 
-WITHHELD = "withheld: read this text first; ask again with screenshot true only if it does not explain the state"
+WITHHELD = (
+    "withheld: an image is returned only for a state this target already showed as text (this state differs from the "
+    "last one read); read this text, then ask again with screenshot true only if it does not explain the state"
+)
 
 
 class ScreenshotGate:

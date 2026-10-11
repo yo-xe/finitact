@@ -348,3 +348,16 @@ def test_show_tab_brings_the_kept_tab_forward_and_detaches():
 
     show_tab("T1", browser_factory=Tab, settle_s=0)
     assert calls == [("open", "T1"), "Page.bringToFront", "close"]
+
+
+def test_unknown_tab_id_names_where_a_tab_id_comes_from(monkeypatch):
+    from finitact import browser as module
+
+    def cdp(method, session_id=None, **params):
+        raise RuntimeError({"code": -32602, "message": "No target with given id found"})
+
+    monkeypatch.setattr(module, "start_harness", lambda: None)
+    monkeypatch.setattr(module, "cdp", cdp)
+    monkeypatch.setattr(module, "KEPT", {})
+    with pytest.raises(ValueError, match="keep_tab true"):
+        module.Browser(None, tab_id="new")
