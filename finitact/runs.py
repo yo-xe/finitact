@@ -1041,15 +1041,24 @@ class WindowsRunCoordinator:
         operations = observed["item_refs"].get(request.pick.ref)
         if operations is None:
             raise _RefusedBeforeActing("pick: ref was not offered by the observation")
-        # An observe item offers its click and fill; the goal's fill value says which is meant. A run's candidate
-        # is one action already, so it is taken as offered (the loop fills after a picked click, ADR-0022).
-        wanted = "fill" if request.fill_values.get(request.goals[0].id) is not None else "click"
-        operation = wanted if wanted in operations else next(iter(operations)) if len(operations) == 1 else None
-        if operation is None:
+        # An observe item offers its click and fill; the goal's fill value or pointer gesture says which is meant.
+        # A run's candidate is one action already, so it is taken as offered (the loop fills after a picked click, ADR-0022).
+        fill_value = request.fill_values.get(request.goals[0].id)
+        wanted = "fill" if fill_value is not None else _picked_pointer_gesture(request)
+        if wanted in operations:
+            source_op = wanted
+        elif wanted in _POINTER_GESTURES and "click" in operations and not request.target_id.startswith("uia:"):
+            source_op = "click"
+        elif len(operations) == 1:
+            source_op = next(iter(operations))
+        else:
+            source_op = None
+        if source_op is None:
             raise _RefusedBeforeActing(f"pick: the item offers no {wanted}")
+        operation = wanted if source_op == "click" and wanted in _POINTER_GESTURES else source_op
         if operation not in request.allowed_operations:
             raise _RefusedBeforeActing(f"pick: {operation} is not an allowed operation")
-        return {**observed, "candidate_id": operations[operation]}
+        return {**observed, "candidate_id": operations[source_op], "operation": operation}
 
     def _adopt(self, request, adapter, retained):
         adopt = getattr(adapter, "adopt", None)
@@ -1058,6 +1067,12 @@ class WindowsRunCoordinator:
         observation = retained["observation"]
         adopt(observation, retained["frames"])
         candidate = next(item for item in observation.candidates if item.id == retained["candidate_id"])
+        if retained.get("operation") and candidate.operation != retained["operation"]:
+            candidate = replace(candidate, operation=retained["operation"])
+            observation = replace(
+                observation,
+                candidates=tuple(candidate if item.id == candidate.id else item for item in observation.candidates),
+            )
         return observation, candidate
 
     def _retain(self, request, adapter, observation, candidates):
@@ -1781,6 +1796,31 @@ def _without_new_defaults(fields: dict) -> dict:
 
 def _normalized(text: str | None) -> str:
     return " ".join((text or "").split()).casefold()
+
+
+_POINTER_GESTURES: dict[str, tuple[str, ...]] = {
+    "double_click": ("double click", "double-click", "double_click", "doubleclick", "ダブルクリック"),
+    "right_click": ("right click", "right-click", "right_click", "rightclick", "右クリック"),
+    "middle_click": ("middle click", "middle-click", "middle_click", "middleclick", "中クリック"),
+    "ctrl_click": ("ctrl click", "ctrl-click", "ctrl+click", "ctrl_click"),
+    "shift_click": ("shift click", "shift-click", "shift+click", "shift_click"),
+    "hover": ("hover", "mouse over", "mouseover", "ホバー"),
+}
+
+
+def _picked_pointer_gesture(request: WindowsRunRequest) -> str:
+    allowed = [op for op in ("click", *_POINTER_GESTURES) if op in request.allowed_operations]
+    goal_text = _normalized(request.goals[0].goal)
+    named = [
+        op
+        for op in _POINTER_GESTURES
+        if op in allowed and any(phrase in goal_text for phrase in _POINTER_GESTURES[op])
+    ]
+    if len(named) == 1:
+        return named[0]
+    if "click" not in allowed and len(allowed) == 1:
+        return allowed[0]
+    return "click"
 
 
 def _annotated(candidates, annotations: Sequence[AppAnnotation]) -> list[ObservedCandidate]:

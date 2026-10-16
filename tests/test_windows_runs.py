@@ -671,6 +671,7 @@ class RetainingAdapter(ManyCandidatesAdapter):
         super().__init__()
         self.screen = screen
         self.adopted = []
+        self.acted_operations = []
         self.observes = 0
 
     def observe(self):
@@ -683,6 +684,7 @@ class RetainingAdapter(ManyCandidatesAdapter):
 
     def act(self, candidate, observation, text=None):
         self.acts.append((candidate.id, text))
+        self.acted_operations.append(candidate.operation)
         self.screen["version"] += 1
         return MutationResult(candidate.id, "synthetic_pointer", "confirmed")
 
@@ -814,6 +816,38 @@ def test_observe_ref_acts_without_the_chooser_and_resolves_fill_by_the_goal():
     assert [goal.termination_reason for goal in (clicked.goals[0], filled.goals[0])] == ["provider_done"] * 2
     assert adapters[0].acts == [("c2", None)] and adapters[1].acts == [("f6", "hello")]
     assert clicked.goals[0].metrics["direct_picks"] == 1 and adapters[0].observes == 1
+
+
+def test_observe_ref_resolves_pointer_gesture_from_goal_or_single_allowed_gesture():
+    screen, adapters, factory = _pick_setup()
+    provider = JudgedProvider(("DONE", 0.9, {"DONE": 0.9}), ("DONE", 0.9, {"DONE": 0.9}))
+    coordinator = WindowsRunCoordinator(adapter_factory=factory, decision_provider=provider)
+    probe = RetainingAdapter(screen)
+
+    _observed(coordinator, probe)
+    double_clicked = coordinator.execute(
+        request(
+            run_id="o-dc",
+            goals=(Goal("g1", "Double click the Discord icon"),),
+            allowed_operations=("click", "double_click"),
+            pick=CandidatePick("1"),
+        )
+    )
+    _observed(coordinator, probe)
+    right_clicked = coordinator.execute(
+        request(
+            run_id="o-rc",
+            goals=(Goal("g1", "Open context menu"),),
+            allowed_operations=("right_click",),
+            pick=CandidatePick("1"),
+        )
+    )
+
+    assert [goal.termination_reason for goal in (double_clicked.goals[0], right_clicked.goals[0])] == ["provider_done"] * 2
+    assert adapters[0].acted_operations == ["double_click"]
+    assert adapters[1].acted_operations == ["right_click"]
+    assert double_clicked.goals[0].metrics["direct_picks"] == 1
+    assert right_clicked.goals[0].metrics["direct_picks"] == 1
 
 
 def test_observe_ref_is_rejected_when_expired_absent_or_superseded():

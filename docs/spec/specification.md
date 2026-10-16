@@ -55,7 +55,7 @@
   その観測が窓の最新観測になり、呼び出し側は最初のgoalの`ref`でその候補を直接指定するか、goalを言い換える(ADR-0019/0020/0043)。
 - `observe_window`は各項目の`ref`を返し、その観測が窓の最新観測になる。最初のgoalの`ref`は窓の最新観測(observeまたは
   uncertain runの終端)を指し、runの最初の1手を判断器なしでその項目にする。observe項目は最初のgoalにfill値があればfill、
-  無ければclickへ解決し、操作が1つだけの項目(run候補)はその操作。無い・許可外の操作は`blocked`。refは窓ごと最新1件・
+  無ければclick(または一意な許可pointer操作)へ解決し、操作が1つだけの項目(run候補)はその操作。無い・許可外の操作は`blocked`。refは窓ごと最新1件・
   60秒以内・同じ窓の次のrun開始までで1回限り、窓が変わっていれば操作せず`blocked`(ADR-0041/0042/0043)。
 - Windows runはgoal IDごとに任意の`click_label_constraints`を受ける。指定時は完全一致するclick候補が一意な時だけ
   その候補を判断器へ提示・送信し、他のclick、近似label、同名複数候補を拒否する。自由文goalからは推定せず、pickにも
@@ -76,7 +76,7 @@
 - browser mutation は再試行せず、実行を記録してから結果を観測する。
 - mutation intent は browser input 前に記録する。成功は `confirmed`、入力前 stale は
   `not_attempted`、結果を確定できない例外は `uncertain` としてrunを停止する。
-- model providerへのlogical callと各HTTP attemptを分離して記録する。記録対象はprovider、model、
+- model providerへのlogical callと各HTTP attemptを分離して記録する。記録対象はprovider、model(と応答の`resolved_model`)、
   request hash、question ID、HTTP status、latency、retry状態とし、credentialとrequest本文は保存しない。
 - TypeSafeとtext helperのretry・失敗を含むHTTP attemptをrun単位で合算し、120回へ達した後は
   次のrequestを送らず`BLOCKED`相当で停止する。

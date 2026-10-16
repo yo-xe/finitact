@@ -1027,7 +1027,7 @@ class ScreenGroundedAdapter:
         # A fill target is an editable field whose own caret blinks, so it is re-identified by its region only.
         # A UIA candidate is re-identified by UIA, not by pixels a hover highlight changes.
         uia_source = candidate is not None and bool(uia_hwnds) and _uia_evidence(candidate)
-        if candidate is not None and candidate.operation == "click" and not uia_source:
+        if candidate is not None and candidate.operation in POINTER_OPERATIONS and not uia_source:
             own = _frame_by_hwnd(current, _scope_hwnd(candidate) or current[0].hwnd)
             if own is None or own.anchor_fingerprint(_candidate_rect(candidate)) != candidate.binding.get("anchor_fingerprint"):
                 return False

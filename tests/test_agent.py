@@ -392,13 +392,13 @@ def test_provider_attempt_journal_records_retries_without_request_or_credentials
 
     post = Mock(side_effect=[
         response(503, {"error": {"message": "temporary"}}),
-        response(200, {"answers": {}, "model": "jev-test", "usage": {}}),
+        response(200, {"answers": {}, "model": "jev-1.14.0", "usage": {}}),
     ])
     monkeypatch.setattr(model.CLIENT, "post", post)
     monkeypatch.setattr(model.time, "sleep", Mock())
     audit = []
     body = {
-        "model": "jev-test",
+        "model": "jev-latest",
         "state": {"private": "must-not-be-journaled"},
         "questions": {"operation": {"type": "choice"}},
     }
@@ -412,9 +412,10 @@ def test_provider_attempt_journal_records_retries_without_request_or_credentials
         provider="typesafe",
     )
 
-    assert result["model"] == "jev-test"
+    assert result["model"] == "jev-1.14.0"
     assert [entry["status"] for entry in audit] == ["retryable_error", "confirmed"]
     assert [entry["http_status"] for entry in audit] == [503, 200]
+    assert audit[1]["model"] == "jev-latest" and audit[1]["resolved_model"] == "jev-1.14.0"
     assert audit[0]["will_retry"] is True and audit[1]["will_retry"] is False
     assert audit[0]["request_sha256"] == audit[1]["request_sha256"]
     assert audit[0]["question_ids"] == ["operation"]

@@ -101,13 +101,19 @@ def _post_json(url, key, body, *, audit=None, call_id=None, provider="model", at
             raise RuntimeError(
                 f"Model provider returned HTTP {response.status_code}{suffix}; no action executed."
             )
+        payload = response.json()
         if entry:
             entry.update(
                 status="confirmed",
                 http_status=response.status_code,
                 latency_ms=round((time.perf_counter() - started) * 1000),
+                **(
+                    {"resolved_model": payload["model"]}
+                    if isinstance(payload, dict) and isinstance(payload.get("model"), str)
+                    else {}
+                ),
             )
-        return response.json()
+        return payload
     raise RuntimeError("Model unavailable")
 
 
